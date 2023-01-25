@@ -8,10 +8,10 @@ This action allows to check for inconsistencies in `scripts.h`, `scripts.lst`, `
 - name: Fallout tests
   uses: BGforgeNet/fallout-tests@master
   with:
-  scripts_h: scripts_src/headers/scripts.h
-  scripts_lst: data/scripts/scripts.lst
-  scripts_dir: scripts_src
-  dialog_dir: data/text/english/dialog
+    scripts_h: scripts_src/headers/scripts.h
+    scripts_lst: data/scripts/scripts.lst
+    scripts_dir: scripts_src
+    dialog_dir: data/text/english/dialog
 ```
 
 #### Inputs
