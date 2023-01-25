@@ -16,12 +16,12 @@ This action allows to search for inconsistencies in `scripts.h`, `scripts.lst`, 
 
 #### Inputs
 
-| name          | required | default                         | description                         |
-| ------------- | -------- | ------------------------------- | ----------------------------------- |
-| scripts_h     | false    | `scripts_src/headers/scripts.h` | `scripts.h` path                    |
-| scripts_lst   | false    | `data/scripts/scripts.lst`      | `scripts.lst` path                  |
-| scripts_dir   | false    | `scripts_src`                   | scripts directory                   |
-| dialog_dir    | false    | `data/text/english/dialog`      | `text/english/dialog` path          |
-| check_scripts | false    | true                            | check `scripts.h` and `scripts.lst` |
-| check_lvars   | false    | true                            | check LVARs vs `scripts.lst`        |
-| check_msgs    | false    | true                            | check @ `msg` references in scripts |
+| name            | required | default                         | description                         |
+| --------------- | -------- | ------------------------------- | ----------------------------------- |
+| `scripts_h`     | no       | `scripts_src/headers/scripts.h` | `scripts.h` path                    |
+| `scripts_lst`   | no       | `data/scripts/scripts.lst`      | `scripts.lst` path                  |
+| `scripts_dir`   | no       | `scripts_src`                   | scripts directory                   |
+| `dialog_dir`    | no       | `data/text/english/dialog`      | `text/english/dialog` path          |
+| `check_scripts` | no       | `true`                          | check `scripts.h` and `scripts.lst` |
+| `check_lvars`   | no       | `true`                          | check LVARs vs `scripts.lst`        |
+| `check_msgs`    | no       | `true`                          | check @ `msg` references in scripts |
