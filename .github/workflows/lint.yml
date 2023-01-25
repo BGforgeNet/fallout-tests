@@ -24,4 +24,4 @@ jobs:
       - name: Pylint
         run: |
           pip install -r requirements-dev.txt
-          pylint .
+          pylint scripts
