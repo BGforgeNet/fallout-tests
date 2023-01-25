@@ -8,7 +8,7 @@ inputs:
   scripts_h:
     description: scripts.h path
     required: false
-    default: ""
+    default: scripts_src/headers/scripts.h
   scripts_lst:
     description: scripts.lst path
     default: data/scripts/scripts.lst
@@ -16,7 +16,7 @@ inputs:
   scripts_dir:
     description: scripts directory
     required: false
-    default: ""
+    default: scripts_src
   dialog_dir:
     description: text/english/dialog path
     default: data/text/english/dialog

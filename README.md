@@ -1,6 +1,6 @@
 ### Fallout tests
 
-This action allows to check for inconsistencies in `scripts.h`, `scripts.lst`, `*.ssl`, `*.msg` files.
+This action allows to search for inconsistencies in `scripts.h`, `scripts.lst`, `*.ssl`, `*.msg` files.
 
 #### Usage
 
@@ -16,12 +16,12 @@ This action allows to check for inconsistencies in `scripts.h`, `scripts.lst`, `
 
 #### Inputs
 
-| name          | required | default                    | description                         |
-| ------------- | -------- | -------------------------- | ----------------------------------- |
-| scripts_h     | false    | ""                         | `scripts.h` path                      |
-| scripts_lst   | false    | `data/scripts/scripts.lst` | `scripts.lst` path                  |
-| scripts_dir   | false    | ""                         | scripts directory                   |
-| dialog_dir    | false    | `data/text/english/dialog` | `text/english/dialog` path          |
-| check_scripts | false    | true                       | check `scripts.h` and `scripts.lst` |
-| check_lvars   | false    | true                       | check LVARs vs `scripts.lst`        |
-| check_msgs    | false    | true                       | check msg references in scripts     |
+| name          | required | default                         | description                         |
+| ------------- | -------- | ------------------------------- | ----------------------------------- |
+| scripts_h     | false    | `scripts_src/headers/scripts.h` | `scripts.h` path                    |
+| scripts_lst   | false    | `data/scripts/scripts.lst`      | `scripts.lst` path                  |
+| scripts_dir   | false    | `scripts_src`                   | scripts directory                   |
+| dialog_dir    | false    | `data/text/english/dialog`      | `text/english/dialog` path          |
+| check_scripts | false    | true                            | check `scripts.h` and `scripts.lst` |
+| check_lvars   | false    | true                            | check LVARs vs `scripts.lst`        |
+| check_msgs    | false    | true                            | check @ `msg` references in scripts |
