@@ -75,6 +75,20 @@ def get_dialog_messages(dialog_path):
     return dialog_messages
 
 
+def get_messages_from_file(script_text):
+    script_messages = []
+    gen_messages = []
+    lines = re.sub(r"/\*.+?\*/", "", script_text, flags=re.DOTALL).split("\n")
+    for line in lines:
+        if line.lstrip().startswith("//"):
+            continue
+        messages = get_script_messages(line)
+        script_messages.extend(messages)
+        messages = get_gen_messages(line)
+        gen_messages.extend(messages)
+    return {"script": script_messages, "gen": gen_messages}
+
+
 def main():
     message_count = 0
     g_dialog_messages = get_generic_messages(G_DIALOG_PATH)
@@ -84,16 +98,13 @@ def main():
     for script_path in script_paths:
         script_messages = []
         g_script_messages = []
-        with open(script_path, encoding="cp1252") as fscript:
-            script_text = fscript.read()
-            lines = re.sub(r"/\*.+?\*/", "", script_text, flags=re.DOTALL).split("\n")
-            for line in lines:
-                if line.lstrip().startswith("//"):
-                    continue
-                messages = get_script_messages(line)
-                script_messages.extend(messages)
-                messages = get_gen_messages(line)
-                g_script_messages.extend(messages)
+
+        with open(script_path, encoding="cp1252") as fhandle:
+            script_text = fhandle.read()
+
+        messages = get_messages_from_file(script_text)
+        script_messages.extend(messages["script"])
+        g_script_messages.extend(messages["gen"])
 
         script_messages = list(dict.fromkeys(script_messages))
         g_script_messages = list(dict.fromkeys(g_script_messages))
@@ -113,12 +124,7 @@ def main():
         g_script_only = [item for item in g_script_messages if item not in g_dialog_messages]
         if g_script_only:
             print(
-                "Generic messages in "
-                + script_path
-                + " missing from "
-                + G_DIALOG_PATH
-                + ": "
-                + " ".join(g_script_only)
+                "Generic messages in " + script_path + " missing from " + G_DIALOG_PATH + ": " + " ".join(g_script_only)
             )
             found_missing = True
 
