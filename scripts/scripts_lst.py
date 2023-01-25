@@ -54,7 +54,7 @@ def check_lst_dupes(lst_by_num):
     return found_dupes
 
 
-def check_scripts_h(lst_by_num, h_by_num, h_by_name):
+def check_scripts_h(lst_by_num, h_by_num, h_by_name) -> bool:
     """search mismatched names and missing scripts.h defines"""
     warning = False
     for i in range(1, len(lst_by_num)):
