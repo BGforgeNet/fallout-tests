@@ -18,7 +18,7 @@ This action allows to check for inconsistencies in `scripts.h`, `scripts.lst`, `
 
 | name          | required | default                    | description                         |
 | ------------- | -------- | -------------------------- | ----------------------------------- |
-| scripts_h     | false    | ""                         | scripts.h path                      |
+| scripts_h     | false    | ""                         | `scripts.h` path                      |
 | scripts_lst   | false    | `data/scripts/scripts.lst` | `scripts.lst` path                  |
 | scripts_dir   | false    | ""                         | scripts directory                   |
 | dialog_dir    | false    | `data/text/english/dialog` | `text/english/dialog` path          |
