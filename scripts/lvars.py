@@ -44,6 +44,7 @@ def get_max_lvar(fpath):
 
 def main():
     lvars = get_lvars_map()
+    found_mismatch = False
     # pylint: disable=unused-variable
     for dir_name, subdir_list, file_list in os.walk(args.SCRIPTS_DIR, topdown=False):
         for file_name in file_list:
@@ -56,7 +57,9 @@ def main():
                         f"Script {script_name} has {max_lvar} LVARs defined, "
                         f"but scripts.lst only allows {lvars[script_name]}."
                     )
-                    sys.exit(1)
+                    found_mismatch = True
+    if found_mismatch:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
