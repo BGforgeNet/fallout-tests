@@ -7,17 +7,31 @@ branding:
 inputs:
   scripts_h:
     description: scripts.h path
-    required: true
+    required: false
+    default: ""
   scripts_lst:
     description: scripts.lst path
     default: data/scripts/scripts.lst
-    required: true
+    required: false
   scripts_dir:
     description: scripts directory
-    required: true
+    required: false
+    default: ""
   dialog_dir:
     description: text/english/dialog path
     default: data/text/english/dialog
+    required: false
+  check_scripts:
+    description: check scripts.h and scripts.lst
+    default: true
+    required: false
+  check_lvars:
+    description: check LVARs vs scripts.lst
+    default: true
+    required: false
+  check_msgs:
+    description: check msg references in scripts
+    default: true
     required: false
 
 runs:
@@ -31,3 +45,6 @@ runs:
         INPUT_SCRIPTS_LST: ${{ inputs.scripts_lst }}
         INPUT_SCRIPTS_DIR: ${{ inputs.scripts_dir }}
         INPUT_DIALOG_DIR: ${{ inputs.dialog_dir }}
+        INPUT_CHECK_SCRIPTS: ${{ inputs.check_scripts }}
+        INPUT_CHECK_LVARS: ${{ inputs.check_lvars }}
+        INPUT_CHECK_MSGS: ${{ inputs.check_msgs }}
