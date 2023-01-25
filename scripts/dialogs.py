@@ -106,7 +106,7 @@ def main():
 
         script_only = [item for item in script_messages if item not in dialog_messages]
         if script_only:
-            print("Messages in " + script_path + " that missed in " + dialog_path + ": " + " ".join(script_only))
+            print("Messages in " + script_path + " missing from " + dialog_path + ": " + " ".join(script_only))
             found_missing = True
         message_count += len(script_messages)
 
@@ -115,7 +115,7 @@ def main():
             print(
                 "Generic messages in "
                 + script_path
-                + " that missed in "
+                + " missing from "
                 + G_DIALOG_PATH
                 + ": "
                 + " ".join(g_script_only)
