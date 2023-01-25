@@ -25,3 +25,6 @@ jobs:
         run: |
           pip install -r requirements-dev.txt
           pylint scripts
+
+      - name: Black
+        uses: psf/black@stable
