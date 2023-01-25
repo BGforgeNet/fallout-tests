@@ -2,6 +2,7 @@
 
 import os
 from glob import glob
+import sys
 import re
 import argparse
 
@@ -78,6 +79,7 @@ def main():
     message_count = 0
     g_dialog_messages = get_generic_messages(G_DIALOG_PATH)
     script_paths = get_script_paths(args.SCRIPTS_DIR)
+    found_missing = False
 
     for script_path in script_paths:
         script_messages = []
@@ -105,6 +107,7 @@ def main():
         script_only = [item for item in script_messages if item not in dialog_messages]
         if script_only:
             print("Messages in " + script_path + " that missed in " + dialog_path + ": " + " ".join(script_only))
+            found_missing = True
         message_count += len(script_messages)
 
         g_script_only = [item for item in g_script_messages if item not in g_dialog_messages]
@@ -117,9 +120,14 @@ def main():
                 + ": "
                 + " ".join(g_script_only)
             )
+            found_missing = True
+
         message_count += len(g_script_messages)
 
     print("Messages tested: " + str(message_count))
+
+    if found_missing:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
