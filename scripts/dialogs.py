@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import os
-from glob import glob
-import sys
-import re
 import argparse
+import os
+import re
+import sys
+from glob import glob
 
 parser = argparse.ArgumentParser(
     description="Find inconsistencies between ssl and msg",
@@ -51,7 +51,7 @@ def get_script_messages(line):
 
 def get_gen_messages(line):
     # pylint: disable=invalid-name
-    MSG_REGEX = re.compile("[^_]+g_mstr *( *([0-9]{3,5}) *)")
+    MSG_REGEX = re.compile(r"[^_]+g_mstr *\( *([0-9]{3,5}) *\)")
     messages = re.findall(MSG_REGEX, line)
     return messages
 
