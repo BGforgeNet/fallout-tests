@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import sys
-import re
-import os
 import argparse
+import os
+import re
+import sys
 
 parser = argparse.ArgumentParser(
     description="Check if there are enough LVARs allowed in scripts.lst",
@@ -32,13 +32,20 @@ def get_lvars_map():
 
 def get_max_lvar(fpath):
     max_lvar = 0
+    found_lvar = False
     with open(fpath, encoding="cp1252") as fhandle:
         for fline in fhandle:
             match = re.match(r"^#define\s+LVAR_\w+\s+\((\d+)\)\s+.*", fline)
             if match:
+                found_lvar = True
                 cur_lvar = int(match[1])
                 if cur_lvar > max_lvar:
                     max_lvar = cur_lvar
+
+    # LVAR index starts from 0
+    if found_lvar:
+        max_lvar += 1
+
     return max_lvar
 
 
