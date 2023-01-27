@@ -61,7 +61,8 @@ def main():
                 script_name = os.path.splitext(file_name)[0]
                 if script_name in lvars and lvars[script_name] < max_lvar:
                     print(
-                        f"Script {script_name} has {max_lvar} LVARs defined, "
+                        f"Script {script_name} max LVAR index is {max_lvar - 1}, "
+                        f"which requires {max_lvar} variables, "
                         f"but scripts.lst only allows {lvars[script_name]}."
                     )
                     found_mismatch = True
