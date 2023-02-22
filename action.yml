@@ -33,6 +33,14 @@ inputs:
     description: check msg references in scripts
     default: true
     required: false
+  worldmap_path:
+    description: if set, run worldmap tests
+    default: false
+    required: false
+  worldmap_script_sets:
+    description: "scripts allowed to go together in a encounter, like so: '-s 100,101  200,201,202'"
+    default: false
+    required: false
 
 runs:
   using: "composite"
@@ -48,3 +56,5 @@ runs:
         INPUT_CHECK_SCRIPTS: ${{ inputs.check_scripts }}
         INPUT_CHECK_LVARS: ${{ inputs.check_lvars }}
         INPUT_CHECK_MSGS: ${{ inputs.check_msgs }}
+        INPUT_WORLDMAP_PATH: ${{ inputs.worldmap_path }}
+        INPUT_WORLDMAP_SCRIPT_SETS: ${{ inputs.worldmap_script_sets }}

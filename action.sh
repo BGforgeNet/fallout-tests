@@ -11,3 +11,13 @@ fi
 if [[ "$INPUT_CHECK_MSGS" == "true" ]]; then
     ./scripts/dialogs.py "$INPUT_DIALOG_DIR" "$INPUT_SCRIPTS_DIR"
 fi
+
+if [[ "$INPUT_WORLDMAP_PATH" != "false" ]]; then
+    sets_arg=""
+    if [[ "$INPUT_WORLDMAP_SCRIPT_SETS" != "false" ]]; then
+        sets_arg="-s $INPUT_WORLDMAP_SCRIPT_SETS"
+    fi
+    # we speficically want word splitting
+    # shellcheck disable=SC2086
+    ./scripts/worldmap.py "$INPUT_DIALOG_DIR" $sets_arg
+fi
