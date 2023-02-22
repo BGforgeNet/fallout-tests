@@ -12,6 +12,8 @@ This action allows to search for inconsistencies in `scripts.h`, `scripts.lst`, 
     scripts_lst: data/scripts/scripts.lst
     scripts_dir: scripts_src
     dialog_dir: data/text/english/dialog
+    worldmap_path: data/data/worldmap.txt
+    worldmap_script_sets: 100,101  200,201,202
 ```
 
 #### Inputs
@@ -27,5 +29,3 @@ This action allows to search for inconsistencies in `scripts.h`, `scripts.lst`, 
 | `check_msgs`           | `true`                          | check @ `msg` references in scripts |
 | `worldmap_path`        | `false`                         | path to `worldmap.txt`              |
 | `worldmap_script_sets` | `false`                         | allowed script sets in an encounter |
-
-`worldmap_script_sets` is specified like this: `100,101  200,201,202`
