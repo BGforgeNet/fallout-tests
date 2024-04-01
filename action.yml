@@ -23,23 +23,23 @@ inputs:
     required: false
   check_scripts:
     description: check scripts.h and scripts.lst
-    default: true
+    default: "true"
     required: false
   check_lvars:
     description: check LVARs vs scripts.lst
-    default: true
+    default: "true"
     required: false
   check_msgs:
     description: check msg references in scripts
-    default: true
+    default: "true"
     required: false
   worldmap_path:
     description: if set, run worldmap tests
-    default: false
+    default: "false"
     required: false
   worldmap_script_sets:
     description: "scripts allowed to go together in a encounter, like so: '-s 100,101  200,201,202'"
-    default: false
+    default: "false"
     required: false
 
 runs:
