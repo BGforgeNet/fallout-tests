@@ -39,8 +39,7 @@ def get_max_lvar(fpath):
             if match:
                 found_lvar = True
                 cur_lvar = int(match[1])
-                if cur_lvar > max_lvar:
-                    max_lvar = cur_lvar
+                max_lvar = max(max_lvar, cur_lvar)
 
     # LVAR index starts from 0
     if found_lvar:
