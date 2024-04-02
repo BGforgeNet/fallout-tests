@@ -45,7 +45,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: test
+    - name: Initialize environment
+      shell: bash
+      run: |
+        set -xeu -o pipefail
+        pip3 install -r "$GITHUB_ACTION_PATH/requirements.txt" --quiet
+        echo "${GITHUB_ACTION_PATH}/scripts" >> $GITHUB_PATH
+
+    - name: Test
       shell: bash
       run: $GITHUB_ACTION_PATH/action.sh
       env:
