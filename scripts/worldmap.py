@@ -2,6 +2,7 @@
 
 import argparse
 import configparser
+import os
 import re
 import sys
 
@@ -39,6 +40,13 @@ def get_allowed_script_sets():
 def main():
     error = False
     allowed_sets = get_allowed_script_sets()
+
+    if not os.path.exists(args.worldmap):
+        print(f"{args.worldmap} does not exist.")
+        sys.exit(1)
+    if not os.path.isfile(args.worldmap):
+        print(f"{args.worldmap} is not a file")
+        sys.exit(1)
 
     wmap = configparser.ConfigParser(interpolation=None)
     wmap.read(args.worldmap)
