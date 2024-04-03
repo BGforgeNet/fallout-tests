@@ -130,7 +130,7 @@ def main():
 
         message_count += len(g_script_messages)
 
-    print("Messages tested: " + str(message_count))
+    print(f"Messages checked: {message_count}")
 
     if found_missing:
         sys.exit(1)
