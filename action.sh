@@ -19,5 +19,5 @@ if [[ "$INPUT_WORLDMAP_PATH" != "false" ]]; then
     fi
     # we speficically want word splitting
     # shellcheck disable=SC2086
-    worldmap.py "$INPUT_DIALOG_DIR" $sets_arg
+    worldmap.py "$INPUT_WORLDMAP_PATH" $sets_arg
 fi
