@@ -6,7 +6,7 @@ This action allows to search for inconsistencies in `scripts.h`, `scripts.lst`, 
 
 ```yaml
 - name: Fallout tests
-  uses: BGforgeNet/fallout-tests@master
+  uses: BGforgeNet/fallout-tests@main
   with:
     scripts_h: scripts_src/headers/scripts.h
     scripts_lst: data/scripts/scripts.lst
