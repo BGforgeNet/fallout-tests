@@ -59,6 +59,11 @@ def main():
         scripts = set()
         for option in options:
             value = wmap.get(section, option)
+
+            # Dead critters don't matter.
+            if value.startswith("Dead,"):
+                continue
+
             match = re.search(r"Script:(\d+)", value)
             if match:
                 script_num = match.groups()[0]
