@@ -30,9 +30,9 @@ def get_allowed_script_sets():
         allow_sets = args.script_sets[0]
         for allow_set in allow_sets:
             allow_list = allow_set.split(",")
-            allow_list = sorted(allow_list)
             # this is for proper sorting
             allow_list = [int(x) for x in allow_list]
+            allow_list = sorted(allow_list)
             allowed_script_sets.append(allow_list)
     return allowed_script_sets
 
