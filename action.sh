@@ -2,6 +2,9 @@
 
 set -xeu -o pipefail
 
+# shellcheck source=/dev/null   # Nothing interesting here
+source "$VIRTUALENV_PATH/bin/activate" >/dev/null 2>&1 || true # Very verbose
+
 if [[ "$INPUT_CHECK_SCRIPTS" == "true" ]]; then
     scripts_lst.py "$INPUT_SCRIPTS_H" "$INPUT_SCRIPTS_LST"
 fi

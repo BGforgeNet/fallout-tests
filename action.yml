@@ -49,8 +49,7 @@ runs:
       shell: bash
       run: |
         set -xeu -o pipefail
-        pip3 install -r "$GITHUB_ACTION_PATH/requirements.txt" --quiet
-        echo "${GITHUB_ACTION_PATH}/scripts" >> $GITHUB_PATH
+        $GITHUB_ACTION_PATH/init.sh
 
     - name: Test
       shell: bash
