@@ -23,7 +23,7 @@ jobs:
 
       - name: Pylint
         run: |
-          pip install -r requirements-dev.txt
+          pipx install pylint
           pylint scripts
 
       - name: Black
