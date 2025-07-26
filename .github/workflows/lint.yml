@@ -24,10 +24,10 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
-      - name: Pylint and R
+      - name: Pylint and Ruff
         run: |
           uv run pylint scripts
-          uv run ruff format .uff
+          uv run ruff format .
           uv run ruff check .
 
       - name: Run mypy
