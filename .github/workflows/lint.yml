@@ -21,13 +21,13 @@ jobs:
       - name: ShellCheck
         uses: ludeeus/action-shellcheck@master
 
-      - name: Pylint
+      - name: Lint and Format
         run: |
-          pipx install pylint
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
           pylint scripts
-
-      - name: Black
-        uses: psf/black@stable
+          ruff format .
+          ruff check .
 
       - name: Run mypy
         uses: sasanquaneuf/mypy-github-action@releases/v1
