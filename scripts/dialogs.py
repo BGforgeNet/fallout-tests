@@ -6,11 +6,11 @@ corresponding .msg files to ensure all referenced messages exist.
 """
 
 import argparse
+from glob import glob
 import os
 import re
 import sys
-from glob import glob
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 # Type aliases
 MessageList = List[str]  # List of message IDs
@@ -116,7 +116,7 @@ def get_dialog_path(script_text: str, script_path: str, dialog_dir: str) -> str:
         dialog_path = os.path.join(dialog_dir, match.group(1).lower() + ".msg")
     else:
         # Fallback to script filename if no match found
-        script_name = os.path.basename(script_path).replace('.ssl', '')
+        script_name = os.path.basename(script_path).replace(".ssl", "")
         dialog_path = os.path.join(dialog_dir, script_name.lower() + ".msg")
     return dialog_path
 

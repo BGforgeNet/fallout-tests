@@ -7,9 +7,9 @@ This module checks for:
 - Scripts in scripts.lst that are missing from scripts.h
 """
 
-import sys
-import re
 import argparse
+import re
+import sys
 from typing import Dict, Tuple
 
 # Type aliases for clarity
