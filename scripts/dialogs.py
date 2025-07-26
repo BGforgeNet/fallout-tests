@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
+"""Validate dialog message references in Fallout scripts.
+
+This module cross-references message IDs used in scripts with their
+corresponding .msg files to ensure all referenced messages exist.
+"""
 
 import argparse
 import os
 import re
 import sys
 from glob import glob
+from typing import List, Optional, Dict
+
+# Type aliases
+MessageList = List[str]  # List of message IDs
+MessageDict = Dict[str, MessageList]  # Maps message type to list of message IDs
 
 parser = argparse.ArgumentParser(
     description="Find inconsistencies between ssl and msg",
@@ -17,20 +27,44 @@ args = parser.parse_args()
 G_DIALOG_PATH = os.path.join(args.DIALOG_DIR, "generic.msg")
 
 
-def get_generic_messages(file_path):
-    g_dialog_messages = []
+def get_generic_messages(file_path: str) -> MessageList:
+    """Extract message IDs from generic.msg file.
+
+    Args:
+        file_path: Path to the generic.msg file
+
+    Returns:
+        List of message IDs found in the file
+    """
+    g_dialog_messages: MessageList = []
     with open(file_path, encoding="cp1252") as fdialog:
         for line in fdialog:
             g_dialog_messages.extend(re.findall(r"\{([0-9]{3,5})\}", line))
     return g_dialog_messages
 
 
-def get_script_paths(dir_path):
-    script_paths = [y for x in os.walk(dir_path) for y in glob(os.path.join(x[0], "*.ssl"))]
+def get_script_paths(dir_path: str) -> List[str]:
+    """Find all .ssl script files in the given directory tree.
+
+    Args:
+        dir_path: Root directory to search for scripts
+
+    Returns:
+        List of absolute paths to .ssl files
+    """
+    script_paths: List[str] = [y for x in os.walk(dir_path) for y in glob(os.path.join(x[0], "*.ssl"))]
     return script_paths
 
 
-def get_script_messages(line):
+def get_script_messages(line: str) -> MessageList:
+    """Extract message IDs from a line of script code.
+
+    Args:
+        line: Single line of script code to analyze
+
+    Returns:
+        List of message IDs referenced in the line
+    """
     # pylint: disable=invalid-name
     MSG_REGEX0 = re.compile(
         r"[^_]+(?:display_mstr|floater|dude_floater|Reply|GOption|GLowOption|NOption"
@@ -49,23 +83,54 @@ def get_script_messages(line):
     return messages
 
 
-def get_gen_messages(line):
+def get_gen_messages(line: str) -> MessageList:
+    """Extract generic message IDs from a line of script code.
+
+    Args:
+        line: Single line of script code to analyze
+
+    Returns:
+        List of generic message IDs referenced in the line
+    """
     # pylint: disable=invalid-name
     MSG_REGEX = re.compile(r"[^_]+g_mstr *\( *([0-9]{3,5}) *\)")
     messages = re.findall(MSG_REGEX, line)
     return messages
 
 
-def get_dialog_path(script_text, script_path, dialog_dir):
+def get_dialog_path(script_text: str, script_path: str, dialog_dir: str) -> str:
+    """Determine the dialog file path for a given script.
+
+    Args:
+        script_text: Full text content of the script
+        script_path: Path to the script file
+        dialog_dir: Directory containing dialog files
+
+    Returns:
+        Expected path to the corresponding .msg file
+    """
     match = re.search(r"#define NAME +SCRIPT_([A-Z0-9_]+)", script_text)
     if not match:
         match = re.search(".+/(.+).ssl", script_path)
-    dialog_path = os.path.join(dialog_dir, match.group(1).lower() + ".msg")
+    if match:
+        dialog_path = os.path.join(dialog_dir, match.group(1).lower() + ".msg")
+    else:
+        # Fallback to script filename if no match found
+        script_name = os.path.basename(script_path).replace('.ssl', '')
+        dialog_path = os.path.join(dialog_dir, script_name.lower() + ".msg")
     return dialog_path
 
 
-def get_dialog_messages(dialog_path):
-    dialog_messages = []
+def get_dialog_messages(dialog_path: str) -> Optional[MessageList]:
+    """Extract message IDs from a dialog .msg file.
+
+    Args:
+        dialog_path: Path to the .msg file
+
+    Returns:
+        List of message IDs if file exists, None if file not found
+    """
+    dialog_messages: MessageList = []
     try:
         with open(dialog_path, encoding="cp1252") as fdialog:
             for line in fdialog:
@@ -75,9 +140,17 @@ def get_dialog_messages(dialog_path):
     return dialog_messages
 
 
-def get_messages_from_file(script_text):
-    script_messages = []
-    gen_messages = []
+def get_messages_from_file(script_text: str) -> MessageDict:
+    """Extract all message references from script text.
+
+    Args:
+        script_text: Full text content of the script
+
+    Returns:
+        Dictionary with 'script' and 'gen' message lists
+    """
+    script_messages: MessageList = []
+    gen_messages: MessageList = []
     lines = re.sub(r"/\*.+?\*/", "", script_text, flags=re.DOTALL).split("\n")
     for line in lines:
         if line.lstrip().startswith("//"):
@@ -89,7 +162,8 @@ def get_messages_from_file(script_text):
     return {"script": script_messages, "gen": gen_messages}
 
 
-def main():
+def main() -> None:
+    """Main entry point for dialog validation."""
     message_count = 0
     g_dialog_messages = get_generic_messages(G_DIALOG_PATH)
     script_paths = get_script_paths(args.SCRIPTS_DIR)

@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
+"""Validate worldmap encounter configurations for Fallout.
+
+This module checks that encounter scripts follow allowed combinations,
+preventing invalid script sets from appearing together in encounters.
+"""
 
 import argparse
 import configparser
 import os
 import re
 import sys
+from typing import List, Set
+
+# Type aliases
+ScriptSet = List[int]  # A set of script numbers that can appear together
+AllowedScriptSets = List[ScriptSet]  # List of allowed script combinations
 
 parser = argparse.ArgumentParser(
     description="Find discrepancies in worldmap.txt",
@@ -24,8 +34,13 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def get_allowed_script_sets():
-    allowed_script_sets = []
+def get_allowed_script_sets() -> AllowedScriptSets:
+    """Parse command line arguments to extract allowed script sets.
+
+    Returns:
+        List of script sets where each set is a list of script numbers
+    """
+    allowed_script_sets: AllowedScriptSets = []
     if args.script_sets:
         allow_sets = args.script_sets[0]
         for allow_set in allow_sets:
@@ -37,7 +52,8 @@ def get_allowed_script_sets():
     return allowed_script_sets
 
 
-def main():
+def main() -> None:
+    """Main entry point for worldmap validation."""
     error = False
     allowed_sets = get_allowed_script_sets()
 
@@ -56,7 +72,7 @@ def main():
             continue
 
         options = wmap.options(section)
-        scripts = set()
+        scripts: Set[int] = set()
         for option in options:
             value = wmap.get(section, option)
 
@@ -70,9 +86,9 @@ def main():
                 script_num = int(script_num)
                 scripts.add(script_num)
         if len(scripts) > 1:
-            scripts = sorted(scripts)
-            if scripts not in allowed_sets:
-                print(f"{section} has invalid script combination: {scripts}")
+            scripts_list = sorted(scripts)
+            if scripts_list not in allowed_sets:
+                print(f"{section} has invalid script combination: {scripts_list}")
                 error = True
     if error:
         sys.exit(1)

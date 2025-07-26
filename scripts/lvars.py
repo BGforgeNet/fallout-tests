@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
+"""Validate local variable allocations in Fallout scripts.
+
+This module ensures that scripts don't use more local variables (LVARs)
+than allocated in scripts.lst, preventing runtime errors.
+"""
 
 import argparse
 import os
 import re
 import sys
+from typing import Dict
+
+# Type alias for local variable mapping
+LVarMap = Dict[str, int]  # Maps script name to number of local variables
 
 parser = argparse.ArgumentParser(
     description="Check if there are enough LVARs allowed in scripts.lst",
@@ -15,24 +24,38 @@ parser.add_argument("SCRIPTS_LST", help="scripts.lst path")
 args = parser.parse_args()
 
 
-def get_lvars_map():
-    lvars = {}
+def get_lvars_map() -> LVarMap:
+    """Parse scripts.lst to extract local variable allocations.
+
+    Returns:
+        Dictionary mapping script names to their allocated local variable count
+    """
+    lvars: LVarMap = {}
     with open(args.SCRIPTS_LST, encoding="cp1252") as fhandle:
         # pylint: disable=invalid-name
         linenum = 0
         for line in fhandle:
             linenum += 1
             match = re.match(r"^(\w+)\.int.*local_vars=(\d+)", line)
-            name = match[1].lower()
-            num_lvars = int(match[2])
-            if name not in lvars:  # scripts.lst uses first entry
-                lvars[name] = num_lvars
+            if match:
+                name = match[1].lower()
+                num_lvars = int(match[2])
+                if name not in lvars:  # scripts.lst uses first entry
+                    lvars[name] = num_lvars
     return lvars
 
 
-def get_max_lvar(fpath):
-    max_lvar = 0
-    found_lvar = False
+def get_max_lvar(fpath: str) -> int:
+    """Find the maximum LVAR index used in a script file.
+
+    Args:
+        fpath: Path to the script file to analyze
+
+    Returns:
+        Maximum number of local variables needed (0 if none found)
+    """
+    max_lvar: int = 0
+    found_lvar: bool = False
     with open(fpath, encoding="cp1252") as fhandle:
         for fline in fhandle:
             match = re.match(r"^#define\s+LVAR_\w+\s+\((\d+)\)\s+.*", fline)
@@ -48,7 +71,8 @@ def get_max_lvar(fpath):
     return max_lvar
 
 
-def main():
+def main() -> None:
+    """Main entry point for LVAR validation."""
     lvars = get_lvars_map()
     found_mismatch = False
     # pylint: disable=unused-variable
