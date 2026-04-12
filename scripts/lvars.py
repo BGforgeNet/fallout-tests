@@ -31,7 +31,7 @@ def get_lvars_map() -> LVarMap:
     """
     lvars: LVarMap = {}
     with open(args.SCRIPTS_LST, encoding="cp1252") as fhandle:
-        for _, line in enumerate(fhandle, start=1):
+        for line in fhandle:
             match = re.match(r"^(\w+)\.int.*local_vars=(\d+)", line)
             if match:
                 name = match[1].lower()

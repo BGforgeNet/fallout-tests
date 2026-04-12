@@ -65,7 +65,7 @@ def check_lst_dupes(lst_by_num: ScriptsByNumber) -> bool:
     Returns:
         True if duplicates were found, False otherwise
     """
-    lst_names = [value for _, value in lst_by_num.items()]
+    lst_names = list(lst_by_num.values())
     lst_duped_names = sorted({x for x in lst_names if lst_names.count(x) > 1})
     lst_duped_names = [x for x in lst_duped_names if x != "RESERVED"]
 
