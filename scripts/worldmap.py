@@ -10,11 +10,10 @@ import configparser
 import os
 import re
 import sys
-from typing import List, Set
 
 # Type aliases
-ScriptSet = List[int]  # A set of script numbers that can appear together
-AllowedScriptSets = List[ScriptSet]  # List of allowed script combinations
+ScriptSet = list[int]  # A set of script numbers that can appear together
+AllowedScriptSets = list[ScriptSet]  # List of allowed script combinations
 
 parser = argparse.ArgumentParser(
     description="Find discrepancies in worldmap.txt",
@@ -72,7 +71,7 @@ def main() -> None:
             continue
 
         options = wmap.options(section)
-        scripts: Set[int] = set()
+        scripts: set[int] = set()
         for option in options:
             value = wmap.get(section, option)
 

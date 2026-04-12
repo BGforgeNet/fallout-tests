@@ -10,11 +10,10 @@ from glob import glob
 import os
 import re
 import sys
-from typing import Dict, List, Optional
 
 # Type aliases
-MessageList = List[str]  # List of message IDs
-MessageDict = Dict[str, MessageList]  # Maps message type to list of message IDs
+MessageList = list[str]  # List of message IDs
+MessageDict = dict[str, MessageList]  # Maps message type to list of message IDs
 
 parser = argparse.ArgumentParser(
     description="Find inconsistencies between ssl and msg",
@@ -43,7 +42,7 @@ def get_generic_messages(file_path: str) -> MessageList:
     return g_dialog_messages
 
 
-def get_script_paths(dir_path: str) -> List[str]:
+def get_script_paths(dir_path: str) -> list[str]:
     """Find all .ssl script files in the given directory tree.
 
     Args:
@@ -52,7 +51,7 @@ def get_script_paths(dir_path: str) -> List[str]:
     Returns:
         List of absolute paths to .ssl files
     """
-    script_paths: List[str] = [y for x in os.walk(dir_path) for y in glob(os.path.join(x[0], "*.ssl"))]
+    script_paths: list[str] = [y for x in os.walk(dir_path) for y in glob(os.path.join(x[0], "*.ssl"))]
     return script_paths
 
 
@@ -65,14 +64,11 @@ def get_script_messages(line: str) -> MessageList:
     Returns:
         List of message IDs referenced in the line
     """
-    # pylint: disable=invalid-name
     MSG_REGEX0 = re.compile(
         r"[^_]+(?:display_mstr|floater|dude_floater|Reply|GOption|GLowOption|NOption"
         r"|NLowOption|BOption|BLowOption|GMessage|NMessage|BMessage) *\( *([0-9]{3,5}) *[,\)]"
     )
-    # pylint: disable=invalid-name
     MSG_REGEX1 = re.compile(r"[^_]+mstr *\( *([0-9]{3,5}) *\)")
-    # pylint: disable=invalid-name
     MSG_REGEX2 = re.compile(r"[^_]+(?:floater_rand|Reply_Rand) *\( *([0-9]{3,5}) *, *([0-9]{3,5})")
     messages = []
     messages.extend(re.findall(MSG_REGEX0, line))
@@ -92,7 +88,6 @@ def get_gen_messages(line: str) -> MessageList:
     Returns:
         List of generic message IDs referenced in the line
     """
-    # pylint: disable=invalid-name
     MSG_REGEX = re.compile(r"[^_]+g_mstr *\( *([0-9]{3,5}) *\)")
     messages = re.findall(MSG_REGEX, line)
     return messages
@@ -121,7 +116,7 @@ def get_dialog_path(script_text: str, script_path: str, dialog_dir: str) -> str:
     return dialog_path
 
 
-def get_dialog_messages(dialog_path: str) -> Optional[MessageList]:
+def get_dialog_messages(dialog_path: str) -> MessageList | None:
     """Extract message IDs from a dialog .msg file.
 
     Args:
@@ -135,7 +130,7 @@ def get_dialog_messages(dialog_path: str) -> Optional[MessageList]:
         with open(dialog_path, encoding="cp1252") as fdialog:
             for line in fdialog:
                 dialog_messages.extend(re.findall(r"\{([0-9]{3,5})\}", line))
-    except IOError:
+    except OSError:
         return None
     return dialog_messages
 

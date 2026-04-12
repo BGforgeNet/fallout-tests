@@ -9,10 +9,9 @@ import argparse
 import os
 import re
 import sys
-from typing import Dict
 
 # Type alias for local variable mapping
-LVarMap = Dict[str, int]  # Maps script name to number of local variables
+LVarMap = dict[str, int]  # Maps script name to number of local variables
 
 parser = argparse.ArgumentParser(
     description="Check if there are enough LVARs allowed in scripts.lst",
@@ -32,10 +31,7 @@ def get_lvars_map() -> LVarMap:
     """
     lvars: LVarMap = {}
     with open(args.SCRIPTS_LST, encoding="cp1252") as fhandle:
-        # pylint: disable=invalid-name
-        linenum = 0
-        for line in fhandle:
-            linenum += 1
+        for _, line in enumerate(fhandle, start=1):
             match = re.match(r"^(\w+)\.int.*local_vars=(\d+)", line)
             if match:
                 name = match[1].lower()
@@ -75,8 +71,7 @@ def main() -> None:
     """Main entry point for LVAR validation."""
     lvars = get_lvars_map()
     found_mismatch = False
-    # pylint: disable=unused-variable
-    for dir_name, subdir_list, file_list in os.walk(args.SCRIPTS_DIR, topdown=False):
+    for dir_name, _, file_list in os.walk(args.SCRIPTS_DIR, topdown=False):
         for file_name in file_list:
             if file_name.endswith(".ssl"):
                 path = os.path.join(dir_name, file_name)

@@ -9,30 +9,18 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@2.0.0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8
 
-      - name: Pylint and Ruff
+      - name: Ruff
         run: |
-          uv run pylint scripts
-          uv run ruff format .
+          uv run ruff format --check .
           uv run ruff check .
 
-      - name: Run mypy
-        uses: sasanquaneuf/mypy-github-action@releases/v1
-        with:
-          checkName: "lint" # NOTE: this needs to be the same as the job name
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: ty
+        run: uv run ty check

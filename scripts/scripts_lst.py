@@ -10,11 +10,10 @@ This module checks for:
 import argparse
 import re
 import sys
-from typing import Dict, Tuple
 
 # Type aliases for clarity
-ScriptsByNumber = Dict[int, str]  # Maps script number to script name
-ScriptsByName = Dict[str, int]  # Maps script name to script number
+ScriptsByNumber = dict[int, str]  # Maps script number to script name
+ScriptsByName = dict[str, int]  # Maps script name to script number
 
 parser = argparse.ArgumentParser(
     description="Find discrepancies in scripts.lst and scripts.h",
@@ -26,7 +25,7 @@ parser.add_argument("SCRIPTS_LST", help="scripts.lst path")
 args = parser.parse_args()
 
 
-def parse_h() -> Tuple[ScriptsByNumber, ScriptsByName]:
+def parse_h() -> tuple[ScriptsByNumber, ScriptsByName]:
     """Parse scripts.h file to extract script definitions.
 
     Returns:
@@ -51,9 +50,7 @@ def parse_lst() -> ScriptsByNumber:
     """
     lst_by_num: ScriptsByNumber = {}
     with open(args.SCRIPTS_LST, encoding="cp1252") as fhandle:
-        linenum = 0
-        for line in fhandle:
-            linenum += 1
+        for linenum, line in enumerate(fhandle, start=1):
             scr = line.split(".", maxsplit=1)[0].upper()
             lst_by_num[linenum] = scr
     return lst_by_num
@@ -68,7 +65,7 @@ def check_lst_dupes(lst_by_num: ScriptsByNumber) -> bool:
     Returns:
         True if duplicates were found, False otherwise
     """
-    lst_names = [value for key, value in lst_by_num.items()]
+    lst_names = [value for _, value in lst_by_num.items()]
     lst_duped_names = sorted({x for x in lst_names if lst_names.count(x) > 1})
     lst_duped_names = [x for x in lst_duped_names if x != "RESERVED"]
 
@@ -100,10 +97,9 @@ def check_scripts_h(lst_by_num: ScriptsByNumber, h_by_num: ScriptsByNumber, h_by
             if lst_by_num[i] != h_by_num[i]:
                 print(f"Mismatch: scripts.lst {lst_by_num[i]}, scripts.h {h_by_num[i]}")
                 warning = True
-        else:
-            if (lst_by_num[i] not in h_by_name) and (lst_by_num[i] != "RESERVED"):
-                print(f"Missing: script {lst_by_num[i]}.int, line number {i} in scripts.lst is absent from scripts.h")
-                warning = True
+        elif (lst_by_num[i] not in h_by_name) and (lst_by_num[i] != "RESERVED"):
+            print(f"Missing: script {lst_by_num[i]}.int, line number {i} in scripts.lst is absent from scripts.h")
+            warning = True
     return warning
 
 
