@@ -31,8 +31,6 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("DIALOG_DIR", help="path to msg dialog directory")
 parser.add_argument("SCRIPTS_DIR", help="path to scripts directory")
-args = parser.parse_args()
-G_DIALOG_PATH = os.path.join(args.DIALOG_DIR, "generic.msg")
 
 
 def get_generic_messages(file_path: str) -> MessageList:
@@ -161,8 +159,10 @@ def get_messages_from_file(script_text: str) -> MessageDict:
 
 def main() -> None:
     """Main entry point for dialog validation."""
+    args = parser.parse_args()
+    g_dialog_path = os.path.join(args.DIALOG_DIR, "generic.msg")
     message_count = 0
-    g_dialog_messages = get_generic_messages(G_DIALOG_PATH)
+    g_dialog_messages = get_generic_messages(g_dialog_path)
     script_paths = get_script_paths(args.SCRIPTS_DIR)
     found_missing = False
 
@@ -195,7 +195,7 @@ def main() -> None:
         g_script_only = [item for item in g_script_messages if item not in g_dialog_messages]
         if g_script_only:
             print(
-                "Generic messages in " + script_path + " missing from " + G_DIALOG_PATH + ": " + " ".join(g_script_only)
+                "Generic messages in " + script_path + " missing from " + g_dialog_path + ": " + " ".join(g_script_only)
             )
             found_missing = True
 

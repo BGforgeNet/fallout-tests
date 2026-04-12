@@ -20,17 +20,19 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("SCRIPTS_DIR", help="scripts directory path")
 parser.add_argument("SCRIPTS_LST", help="scripts.lst path")
-args = parser.parse_args()
 
 
-def get_lvars_map() -> LVarMap:
+def get_lvars_map(scripts_lst_path: str) -> LVarMap:
     """Parse scripts.lst to extract local variable allocations.
+
+    Args:
+        scripts_lst_path: Path to the scripts.lst file
 
     Returns:
         Dictionary mapping script names to their allocated local variable count
     """
     lvars: LVarMap = {}
-    with open(args.SCRIPTS_LST, encoding="cp1252") as fhandle:
+    with open(scripts_lst_path, encoding="cp1252") as fhandle:
         for line in fhandle:
             match = re.match(r"^(\w+)\.int.*local_vars=(\d+)", line)
             if match:
@@ -69,7 +71,8 @@ def get_max_lvar(fpath: str) -> int:
 
 def main() -> None:
     """Main entry point for LVAR validation."""
-    lvars = get_lvars_map()
+    args = parser.parse_args()
+    lvars = get_lvars_map(args.SCRIPTS_LST)
     found_mismatch = False
     for dir_name, _, file_list in os.walk(args.SCRIPTS_DIR, topdown=False):
         for file_name in file_list:

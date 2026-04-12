@@ -30,18 +30,19 @@ parser.add_argument(
     required=False,
 )
 
-args = parser.parse_args()
 
+def get_allowed_script_sets(script_sets: list[list[str]] | None) -> AllowedScriptSets:
+    """Parse command line script set arguments to extract allowed script sets.
 
-def get_allowed_script_sets() -> AllowedScriptSets:
-    """Parse command line arguments to extract allowed script sets.
+    Args:
+        script_sets: Parsed value of the -s argument, or None if not provided
 
     Returns:
         List of script sets where each set is a list of script numbers
     """
     allowed_script_sets: AllowedScriptSets = []
-    if args.script_sets:
-        allow_sets = args.script_sets[0]
+    if script_sets:
+        allow_sets = script_sets[0]
         for allow_set in allow_sets:
             allow_list = allow_set.split(",")
             # this is for proper sorting
@@ -53,8 +54,9 @@ def get_allowed_script_sets() -> AllowedScriptSets:
 
 def main() -> None:
     """Main entry point for worldmap validation."""
+    args = parser.parse_args()
     error = False
-    allowed_sets = get_allowed_script_sets()
+    allowed_sets = get_allowed_script_sets(args.script_sets)
 
     if not os.path.exists(args.worldmap):
         print(f"{args.worldmap} does not exist.")
