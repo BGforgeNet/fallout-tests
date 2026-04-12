@@ -109,9 +109,9 @@ def check_scripts_h(lst_by_num: ScriptsByNumber, h_by_num: ScriptsByNumber, h_by
     return warning
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Main entry point for script validation."""
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     h_by_num, h_by_name = parse_h(args.SCRIPTS_H)
     lst_by_num = parse_lst(args.SCRIPTS_LST)
     has_lst_dupes = check_lst_dupes(lst_by_num)

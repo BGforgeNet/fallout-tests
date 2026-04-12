@@ -69,9 +69,9 @@ def get_max_lvar(fpath: str) -> int:
     return max_lvar
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Main entry point for LVAR validation."""
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     lvars = get_lvars_map(args.SCRIPTS_LST)
     found_mismatch = False
     for dir_name, _, file_list in os.walk(args.SCRIPTS_DIR, topdown=False):

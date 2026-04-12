@@ -11,9 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: ShellCheck
-        uses: ludeeus/action-shellcheck@2.0.0
-
       - name: Install uv
         uses: astral-sh/setup-uv@v8
 

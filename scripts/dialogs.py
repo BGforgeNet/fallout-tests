@@ -157,9 +157,9 @@ def get_messages_from_file(script_text: str) -> MessageDict:
     return {"script": script_messages, "gen": gen_messages}
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Main entry point for dialog validation."""
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     g_dialog_path = os.path.join(args.DIALOG_DIR, "generic.msg")
     message_count = 0
     g_dialog_messages = get_generic_messages(g_dialog_path)

@@ -34,24 +34,20 @@ inputs:
     default: "true"
     required: false
   worldmap_path:
-    description: if set, run worldmap tests
-    default: "false"
+    description: worldmap.txt path; if set, run worldmap tests
+    default: ""
     required: false
   worldmap_script_sets:
-    description: "scripts allowed to go together in a encounter, like so: '-s 100,101  200,201,202'"
-    default: "false"
+    description: "allowed script sets, one space-separated set per line"
+    default: ""
     required: false
 
 runs:
   using: "composite"
   steps:
-    - name: Initialize environment
-      shell: bash
-      run: echo "${GITHUB_ACTION_PATH}/scripts" >>"$GITHUB_PATH"
-
     - name: Test
       shell: bash
-      run: $GITHUB_ACTION_PATH/action.sh
+      run: python3 ${GITHUB_ACTION_PATH}/scripts/action.py
       env:
         INPUT_SCRIPTS_H: ${{ inputs.scripts_h }}
         INPUT_SCRIPTS_LST: ${{ inputs.scripts_lst }}

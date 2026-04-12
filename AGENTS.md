@@ -4,7 +4,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Project
 
-A reusable GitHub Action that validates Fallout 1/2 modding data files in CI/CD pipelines. The four Python validators are standalone CLI tools; they are orchestrated by `action.sh` when the Action runs.
+A reusable GitHub Action that validates Fallout 1/2 modding data files in CI/CD pipelines. The four Python validators are standalone CLI tools; they are orchestrated by `scripts/action.py` when the Action runs.
 
 ## Commands
 
@@ -13,7 +13,6 @@ A reusable GitHub Action that validates Fallout 1/2 modding data files in CI/CD 
 uv run ruff format --check .
 uv run ruff check .
 uv run ty check
-shellcheck action.sh init.sh
 
 # Run a single validator manually
 python3 scripts/scripts_lst.py <scripts.h> <scripts.lst>
@@ -26,7 +25,7 @@ There is no test suite — correctness is validated by running the tools against
 
 ## Architecture
 
-All source lives in `scripts/`. Each module is an independent validator with its own `main()` entry point; none import from each other.
+All source lives in `scripts/`. The four validator modules are independent and do not import from each other; `action.py` imports all four to orchestrate them.
 
 | Module | Input files | What it checks |
 |--------|-------------|----------------|
@@ -39,7 +38,7 @@ All source lives in `scripts/`. Each module is an independent validator with its
 
 **Exit codes:** 0 = validation passed, 1 = one or more errors found. Errors are printed to stdout.
 
-**Orchestration:** `action.sh` maps GitHub Action inputs (`INPUT_*` env vars from `action.yml`) to validator invocations. `init.sh` installs a virtualenv for the Action runtime.
+**Orchestration:** `scripts/action.py` reads `INPUT_*` env vars from `action.yml` and calls each validator's `main()` directly.
 
 ## Linter Configuration
 

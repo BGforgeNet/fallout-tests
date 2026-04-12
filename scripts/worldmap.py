@@ -52,9 +52,9 @@ def get_allowed_script_sets(script_sets: list[list[str]] | None) -> AllowedScrip
     return allowed_script_sets
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Main entry point for worldmap validation."""
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     error = False
     allowed_sets = get_allowed_script_sets(args.script_sets)
 
