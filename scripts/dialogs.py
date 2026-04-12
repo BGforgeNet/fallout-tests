@@ -15,6 +15,15 @@ import sys
 MessageList = list[str]  # List of message IDs
 MessageDict = dict[str, MessageList]  # Maps message type to list of message IDs
 
+# Regex patterns for message function calls in scripts
+_MSG_REGEX0 = re.compile(
+    r"[^_]+(?:display_mstr|floater|dude_floater|Reply|GOption|GLowOption|NOption"
+    r"|NLowOption|BOption|BLowOption|GMessage|NMessage|BMessage) *\( *([0-9]{3,5}) *[,\)]"
+)
+_MSG_REGEX1 = re.compile(r"[^_]+mstr *\( *([0-9]{3,5}) *\)")
+_MSG_REGEX2 = re.compile(r"[^_]+(?:floater_rand|Reply_Rand) *\( *([0-9]{3,5}) *, *([0-9]{3,5})")
+_MSG_REGEX_GEN = re.compile(r"[^_]+g_mstr *\( *([0-9]{3,5}) *\)")
+
 parser = argparse.ArgumentParser(
     description="Find inconsistencies between ssl and msg",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -64,16 +73,10 @@ def get_script_messages(line: str) -> MessageList:
     Returns:
         List of message IDs referenced in the line
     """
-    MSG_REGEX0 = re.compile(
-        r"[^_]+(?:display_mstr|floater|dude_floater|Reply|GOption|GLowOption|NOption"
-        r"|NLowOption|BOption|BLowOption|GMessage|NMessage|BMessage) *\( *([0-9]{3,5}) *[,\)]"
-    )
-    MSG_REGEX1 = re.compile(r"[^_]+mstr *\( *([0-9]{3,5}) *\)")
-    MSG_REGEX2 = re.compile(r"[^_]+(?:floater_rand|Reply_Rand) *\( *([0-9]{3,5}) *, *([0-9]{3,5})")
     messages = []
-    messages.extend(re.findall(MSG_REGEX0, line))
-    messages.extend(re.findall(MSG_REGEX1, line))
-    match = re.search(MSG_REGEX2, line)
+    messages.extend(re.findall(_MSG_REGEX0, line))
+    messages.extend(re.findall(_MSG_REGEX1, line))
+    match = re.search(_MSG_REGEX2, line)
     if match:
         messages.extend([str(i) for i in range(int(match.group(1)), int(match.group(2)) + 1)])
     return messages
@@ -88,8 +91,7 @@ def get_gen_messages(line: str) -> MessageList:
     Returns:
         List of generic message IDs referenced in the line
     """
-    MSG_REGEX = re.compile(r"[^_]+g_mstr *\( *([0-9]{3,5}) *\)")
-    messages = re.findall(MSG_REGEX, line)
+    messages = re.findall(_MSG_REGEX_GEN, line)
     return messages
 
 

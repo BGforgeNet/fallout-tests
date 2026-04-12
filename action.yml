@@ -47,9 +47,7 @@ runs:
   steps:
     - name: Initialize environment
       shell: bash
-      run: |
-        set -xeu -o pipefail
-        $GITHUB_ACTION_PATH/init.sh
+      run: echo "${GITHUB_ACTION_PATH}/scripts" >>"$GITHUB_PATH"
 
     - name: Test
       shell: bash
