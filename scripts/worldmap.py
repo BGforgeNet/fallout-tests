@@ -50,7 +50,10 @@ def get_allowed_script_sets(script_sets: list[list[str]] | None) -> AllowedScrip
     if script_sets:
         allow_sets = script_sets[0]
         for allow_set in allow_sets:
-            allow_list = allow_set.split(",")
+            content = allow_set.split("#", 1)[0].split(";", 1)[0].strip()
+            if not content:
+                continue
+            allow_list = [item.strip() for item in content.split(",") if item.strip()]
             # Convert to int for proper numeric sorting
             allow_list_int = sorted(int(x) for x in allow_list)
             allowed_script_sets.append(allow_list_int)

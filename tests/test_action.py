@@ -30,6 +30,12 @@ def test_parse_script_sets_blank_lines() -> None:
     assert result == ["100,101", "200,201"]
 
 
+def test_parse_script_sets_inline_comments() -> None:
+    """parse_script_sets strips inline # and ; comments."""
+    result = action.parse_script_sets("100 101 # merchant guard\n200 201 ; caravan pair")
+    assert result == ["100,101", "200,201"]
+
+
 def test_main_defaults_no_run() -> None:
     """Regression: main() uses os.environ.get() defaults and does not crash when INPUT_* vars are absent.
 

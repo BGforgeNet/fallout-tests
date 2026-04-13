@@ -24,6 +24,12 @@ def test_get_allowed_script_sets_sorted() -> None:
     assert result == [[200, 201]]
 
 
+def test_get_allowed_script_sets_inline_comments() -> None:
+    """get_allowed_script_sets strips inline # and ; comments."""
+    result = worldmap.get_allowed_script_sets([["100,101 # merchant guard", "201,200 ; caravan pair"]])
+    assert result == [[100, 101], [200, 201]]
+
+
 def test_main_valid(fixtures_dir: Path) -> None:
     """main() exits cleanly for an encounter where all scripts match (same ID)."""
     # E01 has Script:100 and Script:100 — only one unique script, no combination to check

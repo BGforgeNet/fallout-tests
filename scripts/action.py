@@ -12,10 +12,16 @@ import worldmap
 def parse_script_sets(raw: str) -> list[str]:
     """Convert multiline script sets to CLI format.
 
-    Input: one space-separated set per line, e.g. "100 101\\n200 201 202"
+    Input: one space-separated set per line, optionally with # or ; comments,
+    e.g. "100 101 # note\\n200 201 202 ; note"
     Output: list of comma-separated strings, e.g. ["100,101", "200,201,202"]
     """
-    return [line.strip().replace(" ", ",") for line in raw.splitlines() if line.strip()]
+    parsed_sets: list[str] = []
+    for line in raw.splitlines():
+        content = line.split("#", 1)[0].split(";", 1)[0].strip()
+        if content:
+            parsed_sets.append(",".join(content.split()))
+    return parsed_sets
 
 
 def main() -> None:
