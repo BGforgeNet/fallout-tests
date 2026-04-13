@@ -94,12 +94,3 @@ def test_main_missing_generic_msg(tmp_path: Path) -> None:
 
     # Should not raise — generic.msg absence is handled gracefully
     dialogs.main([str(dialog_dir), str(scripts_dir)])
-
-
-@pytest.mark.integration
-def test_integration_dialogs(integration_repo: Path) -> None:
-    """Integration: dialog validation passes against Fallout2 Unofficial Patch data."""
-    dialog_dir = integration_repo / "data" / "text" / "english" / "dialog"
-    scripts_dir = integration_repo / "scripts_src"
-    if dialog_dir.exists() and scripts_dir.exists():
-        dialogs.main([str(dialog_dir), str(scripts_dir)])

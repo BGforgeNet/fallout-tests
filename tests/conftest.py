@@ -1,5 +1,6 @@
 """Shared pytest fixtures for the Fallout validator test suite."""
 
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -23,15 +24,24 @@ def fixtures_dir() -> Path:
 
 @pytest.fixture(scope="session")
 def integration_repo(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """Reuse a workspace-local external checkout for integration tests."""
+    """Return the managed integration checkout, updating it to the pinned commit if needed.
+
+    When FALLOUT_TEST_REPO is set, it is treated as the integration cache path owned by the
+    test fixture rather than a read-only working copy.
+    """
     del tmp_path_factory
 
-    cache_root = Path(__file__).parent.parent / "tmp"
-    repo = cache_root / "Fallout2_Unofficial_Patch"
-    git_dir = repo / ".git"
-    cache_root.mkdir(exist_ok=True)
+    configured_repo = os.environ.get("FALLOUT_TEST_REPO")
+    if configured_repo:
+        repo = Path(configured_repo)
+    else:
+        cache_root = Path(__file__).parent.parent / "tmp"
+        cache_root.mkdir(exist_ok=True)
+        repo = cache_root / "Fallout2_Unofficial_Patch"
 
+    git_dir = repo / ".git"
     if not git_dir.exists():
+        repo.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(
             ["git", "clone", "--depth=1", "https://github.com/BGforgeNet/Fallout2_Unofficial_Patch", str(repo)],
             check=True,

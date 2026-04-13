@@ -2,6 +2,25 @@
 
 This action allows to search for inconsistencies in `scripts.h`, `scripts.lst`, `*.ssl`, `*.msg` files.
 
+#### Tests
+
+```bash
+uv run pytest
+uv run pytest -m integration
+```
+
+The default CI run excludes `@pytest.mark.integration` tests. Integration tests are intended for opt-in runs against a
+pinned checkout of `BGforgeNet/Fallout2_Unofficial_Patch`.
+
+`FALLOUT_TEST_REPO` is treated as the managed integration cache path. When set, pytest may clone, fetch, and check out
+the pinned test commit in that directory before running `pytest -m integration`.
+
+To choose where that cache lives, set `FALLOUT_TEST_REPO` before running the integration tests:
+
+```bash
+FALLOUT_TEST_REPO=./tmp/Fallout2_Unofficial_Patch uv run pytest -m integration
+```
+
 #### Usage
 
 ```yaml

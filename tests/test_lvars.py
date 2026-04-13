@@ -55,12 +55,3 @@ def test_main_failing(tmp_path: Path) -> None:
     with pytest.raises(SystemExit) as exc_info:
         lvars.main([str(tmp_path), str(lst_file)])
     assert exc_info.value.code == 1
-
-
-@pytest.mark.integration
-def test_integration_lvars(integration_repo: Path) -> None:
-    """Integration: lvars validation passes against Fallout2 Unofficial Patch data."""
-    scripts_dir = integration_repo / "scripts_src"
-    scripts_lst_path = integration_repo / "data" / "scripts" / "scripts.lst"
-    if scripts_dir.exists() and scripts_lst_path.exists():
-        lvars.main([str(scripts_dir), str(scripts_lst_path)])

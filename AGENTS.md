@@ -16,7 +16,7 @@ uv run ty check
 
 # Tests
 uv run pytest
-uv run pytest -m integration  # requires network; clones real Fallout data
+uv run pytest -m integration  # requires network; uses a managed checkout of real Fallout data
 
 # Run a single validator manually
 python3 scripts/scripts_lst.py <scripts.h> <scripts.lst>
@@ -25,7 +25,7 @@ python3 scripts/dialogs.py <dialog_dir> <scripts_dir>
 python3 scripts/worldmap.py <worldmap.txt> [-s <set1> <set2> ...]
 ```
 
-Tests live in `tests/`. Run with `uv run pytest`. Integration tests against real Fallout data require `pytest -m integration` and clone https://github.com/BGforgeNet/Fallout2_Unofficial_Patch into a temp directory.
+Tests live in `tests/`. Run with `uv run pytest`. Integration tests against real Fallout data require `pytest -m integration` and use a managed checkout of https://github.com/BGforgeNet/Fallout2_Unofficial_Patch pinned by `tests/conftest.py`. If `FALLOUT_TEST_REPO` is set, that path is treated as the managed integration cache and may be updated by the fixture.
 
 ## Architecture
 

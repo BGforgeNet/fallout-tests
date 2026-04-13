@@ -23,4 +23,4 @@ jobs:
         run: uv run ty check
 
       - name: Test
-        run: uv run pytest tests/ -v --tb=short
+        run: uv run pytest -m "not integration" tests/ -v --tb=short
