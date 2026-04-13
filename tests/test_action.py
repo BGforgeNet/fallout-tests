@@ -78,7 +78,11 @@ def test_main_defaults_values() -> None:
 def test_main_worldmap_path(tmp_path: Path) -> None:
     """main() invokes worldmap.main() when INPUT_WORLDMAP_PATH is set."""
     wmap = tmp_path / "worldmap.txt"
+    scripts_h = tmp_path / "scripts.h"
+    scripts_lst = tmp_path / "scripts.lst"
     wmap.write_text("[Encounter: E01]\ntype_00=Pid:16777225, Script:100\n", encoding="utf-8")
+    scripts_h.write_text("#define SCRIPT_ALPHA (100)\n", encoding="utf-8")
+    scripts_lst.write_text("alpha.int ; Alpha script\n", encoding="utf-8")
     with (
         patch("worldmap.main") as mock_worldmap,
         patch.dict(
@@ -88,19 +92,27 @@ def test_main_worldmap_path(tmp_path: Path) -> None:
                 "INPUT_CHECK_LVARS": "false",
                 "INPUT_CHECK_MSGS": "false",
                 "INPUT_WORLDMAP_PATH": str(wmap),
+                "INPUT_SCRIPTS_H": str(scripts_h),
+                "INPUT_SCRIPTS_LST": str(scripts_lst),
                 "INPUT_WORLDMAP_SCRIPT_SETS": "",
             },
             clear=True,
         ),
     ):
         action.main()
-        mock_worldmap.assert_called_once_with([str(wmap)])
+        mock_worldmap.assert_called_once_with(
+            [str(wmap), "--scripts-h", str(scripts_h), "--scripts-lst", str(scripts_lst)]
+        )
 
 
 def test_main_worldmap_with_sets(tmp_path: Path) -> None:
     """main() passes parsed script sets to worldmap.main() when INPUT_WORLDMAP_SCRIPT_SETS is set."""
     wmap = tmp_path / "worldmap.txt"
+    scripts_h = tmp_path / "scripts.h"
+    scripts_lst = tmp_path / "scripts.lst"
     wmap.write_text("[Encounter: E01]\ntype_00=Pid:16777225, Script:100\n", encoding="utf-8")
+    scripts_h.write_text("#define SCRIPT_ALPHA (100)\n", encoding="utf-8")
+    scripts_lst.write_text("alpha.int ; Alpha script\n", encoding="utf-8")
     with (
         patch("worldmap.main") as mock_worldmap,
         patch.dict(
@@ -110,13 +122,17 @@ def test_main_worldmap_with_sets(tmp_path: Path) -> None:
                 "INPUT_CHECK_LVARS": "false",
                 "INPUT_CHECK_MSGS": "false",
                 "INPUT_WORLDMAP_PATH": str(wmap),
+                "INPUT_SCRIPTS_H": str(scripts_h),
+                "INPUT_SCRIPTS_LST": str(scripts_lst),
                 "INPUT_WORLDMAP_SCRIPT_SETS": "100 200",
             },
             clear=True,
         ),
     ):
         action.main()
-        mock_worldmap.assert_called_once_with([str(wmap), "-s", "100,200"])
+        mock_worldmap.assert_called_once_with(
+            [str(wmap), "--scripts-h", str(scripts_h), "--scripts-lst", str(scripts_lst), "-s", "100,200"]
+        )
 
 
 @pytest.mark.integration

@@ -50,6 +50,12 @@ def main() -> None:
     worldmap_path = os.environ.get("INPUT_WORLDMAP_PATH", "")
     if worldmap_path:
         worldmap_argv = [worldmap_path]
+        scripts_h = os.environ.get("INPUT_SCRIPTS_H", "scripts_src/headers/scripts.h")
+        scripts_lst_path = os.environ.get("INPUT_SCRIPTS_LST", "data/scripts/scripts.lst")
+        if scripts_h:
+            worldmap_argv += ["--scripts-h", scripts_h]
+        if scripts_lst_path:
+            worldmap_argv += ["--scripts-lst", scripts_lst_path]
         raw_sets = os.environ.get("INPUT_WORLDMAP_SCRIPT_SETS", "")
         if raw_sets:
             worldmap_argv += ["-s", *parse_script_sets(raw_sets)]

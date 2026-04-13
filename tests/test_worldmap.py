@@ -59,6 +59,35 @@ def test_missing_file(tmp_path: Path) -> None:
     assert exc_info.value.code == 1
 
 
+def test_main_invalid_resolves_script_metadata(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """main() includes explicit scripts.h names and scripts.lst descriptions in invalid output."""
+    wmap = tmp_path / "worldmap.txt"
+    wmap.write_text(
+        "\n[Encounter: E01]\ntype_00=Pid:16777225, Script:1\ntype_01=Pid:16777226, Script:2\n",
+        encoding="utf-8",
+    )
+
+    scripts_h = tmp_path / "scripts.h"
+    scripts_h.write_text(
+        "#define SCRIPT_ALPHA (1)\n#define SCRIPT_BETA (2)\n",
+        encoding="utf-8",
+    )
+    scripts_lst = tmp_path / "scripts.lst"
+    scripts_lst.write_text(
+        "alpha.int ; Alpha script\nbeta.int ; Beta script\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        worldmap.main([str(wmap), "--scripts-h", str(scripts_h), "--scripts-lst", str(scripts_lst)])
+    assert exc_info.value.code == 1
+    assert capsys.readouterr().out == (
+        'Encounter: E01 (line 2) script combination is not allowed:\n'
+        '  1 = SCRIPT_ALPHA = "Alpha script"\n'
+        '  2 = SCRIPT_BETA = "Beta script"\n'
+    )
+
+
 @pytest.mark.integration
 @pytest.mark.skip(
     reason=(
