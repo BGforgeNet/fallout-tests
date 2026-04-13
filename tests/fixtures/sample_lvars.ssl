@@ -1,0 +1,2 @@
+#define LVAR_Status                     (0)
+#define LVAR_Counter                    (1)

@@ -1,0 +1,3 @@
+#define NAME    SCRIPT_VCDOCTOR
+   display_mstr(100)
+   display_mstr(101)

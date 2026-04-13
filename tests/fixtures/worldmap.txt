@@ -1,0 +1,7 @@
+[Encounter: E01]
+type_00=Pid:16777225, Script:100
+type_01=Pid:16777226, Script:100
+
+[Encounter: E02]
+type_00=Pid:16777225, Script:200
+type_01=Dead, Pid:16777226, Script:201

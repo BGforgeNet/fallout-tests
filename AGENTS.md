@@ -14,6 +14,10 @@ uv run ruff format --check .
 uv run ruff check .
 uv run ty check
 
+# Tests
+uv run pytest
+uv run pytest -m integration  # requires network; clones real Fallout data
+
 # Run a single validator manually
 python3 scripts/scripts_lst.py <scripts.h> <scripts.lst>
 python3 scripts/lvars.py <scripts_dir> <scripts.lst>
@@ -21,7 +25,7 @@ python3 scripts/dialogs.py <dialog_dir> <scripts_dir>
 python3 scripts/worldmap.py <worldmap.txt> [-s <set1> <set2> ...]
 ```
 
-There is no test suite — correctness is validated by running the tools against real modding project data.
+Tests live in `tests/`. Run with `uv run pytest`. Integration tests against real Fallout data require `pytest -m integration` and clone https://github.com/BGforgeNet/Fallout2_Unofficial_Patch into a temp directory.
 
 ## Architecture
 
@@ -34,7 +38,7 @@ All source lives in `scripts/`. The four validator modules are independent and d
 | `dialogs.py` | `.msg` files, `.ssl` files | Every message ID referenced in script source exists in the corresponding `.msg` dialog file |
 | `worldmap.py` | `worldmap.txt` | Script number combinations in encounter tables belong to a declared allowed set |
 
-**Encoding:** all Fallout data files are read/written as `cp1252` (Windows-1252).
+**Encoding:** `.msg` dialog files use `cp1252` (Windows-1252). All other files (`scripts.h`, `scripts.lst`, `.ssl` scripts, `worldmap.txt`) are UTF-8/ASCII.
 
 **Exit codes:** 0 = validation passed, 1 = one or more errors found. Errors are printed to stdout.
 

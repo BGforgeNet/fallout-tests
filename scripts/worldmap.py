@@ -3,11 +3,12 @@
 
 This module checks that encounter scripts follow allowed combinations,
 preventing invalid script sets from appearing together in encounters.
+worldmap.txt is UTF-8/ASCII encoded.
 """
 
 import argparse
 import configparser
-import os
+from pathlib import Path
 import re
 import sys
 
@@ -45,10 +46,9 @@ def get_allowed_script_sets(script_sets: list[list[str]] | None) -> AllowedScrip
         allow_sets = script_sets[0]
         for allow_set in allow_sets:
             allow_list = allow_set.split(",")
-            # this is for proper sorting
-            allow_list = [int(x) for x in allow_list]
-            allow_list = sorted(allow_list)
-            allowed_script_sets.append(allow_list)
+            # Convert to int for proper numeric sorting
+            allow_list_int = sorted(int(x) for x in allow_list)
+            allowed_script_sets.append(allow_list_int)
     return allowed_script_sets
 
 
@@ -58,15 +58,16 @@ def main(argv: list[str] | None = None) -> None:
     error = False
     allowed_sets = get_allowed_script_sets(args.script_sets)
 
-    if not os.path.exists(args.worldmap):
+    worldmap_path = Path(args.worldmap)
+    if not worldmap_path.exists():
         print(f"{args.worldmap} does not exist.")
         sys.exit(1)
-    if not os.path.isfile(args.worldmap):
+    if not worldmap_path.is_file():
         print(f"{args.worldmap} is not a file")
         sys.exit(1)
 
     wmap = configparser.ConfigParser(interpolation=None)
-    wmap.read(args.worldmap)
+    wmap.read(str(worldmap_path))
 
     for section in wmap.sections():
         if not section.startswith("Encounter: "):
@@ -83,8 +84,7 @@ def main(argv: list[str] | None = None) -> None:
 
             match = re.search(r"Script:(\d+)", value)
             if match:
-                script_num = match.groups()[0]
-                script_num = int(script_num)
+                script_num = int(match.groups()[0])
                 scripts.add(script_num)
         if len(scripts) > 1:
             scripts_list = sorted(scripts)

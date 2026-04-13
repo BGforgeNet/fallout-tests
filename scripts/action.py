@@ -19,15 +19,33 @@ def parse_script_sets(raw: str) -> list[str]:
 
 
 def main() -> None:
-    """Read INPUT_* env vars and run the appropriate validator scripts."""
-    if os.environ.get("INPUT_CHECK_SCRIPTS") == "true":
-        scripts_lst.main([os.environ["INPUT_SCRIPTS_H"], os.environ["INPUT_SCRIPTS_LST"]])
+    """Read INPUT_* env vars and run the appropriate validator scripts.
 
-    if os.environ.get("INPUT_CHECK_LVARS") == "true":
-        lvars.main([os.environ["INPUT_SCRIPTS_DIR"], os.environ["INPUT_SCRIPTS_LST"]])
+    Defaults below must match those declared in action.yml inputs section.
+    """
+    if os.environ.get("INPUT_CHECK_SCRIPTS", "true") == "true":
+        scripts_lst.main(
+            [
+                os.environ.get("INPUT_SCRIPTS_H", "scripts_src/headers/scripts.h"),
+                os.environ.get("INPUT_SCRIPTS_LST", "data/scripts/scripts.lst"),
+            ]
+        )
 
-    if os.environ.get("INPUT_CHECK_MSGS") == "true":
-        dialogs.main([os.environ["INPUT_DIALOG_DIR"], os.environ["INPUT_SCRIPTS_DIR"]])
+    if os.environ.get("INPUT_CHECK_LVARS", "true") == "true":
+        lvars.main(
+            [
+                os.environ.get("INPUT_SCRIPTS_DIR", "scripts_src"),
+                os.environ.get("INPUT_SCRIPTS_LST", "data/scripts/scripts.lst"),
+            ]
+        )
+
+    if os.environ.get("INPUT_CHECK_MSGS", "true") == "true":
+        dialogs.main(
+            [
+                os.environ.get("INPUT_DIALOG_DIR", "data/text/english/dialog"),
+                os.environ.get("INPUT_SCRIPTS_DIR", "scripts_src"),
+            ]
+        )
 
     worldmap_path = os.environ.get("INPUT_WORLDMAP_PATH", "")
     if worldmap_path:

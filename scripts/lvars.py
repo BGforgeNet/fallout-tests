@@ -3,10 +3,11 @@
 
 This module ensures that scripts don't use more local variables (LVARs)
 than allocated in scripts.lst, preventing runtime errors.
+Only scripts.lst uses cp1252 encoding; .ssl script files are UTF-8/ASCII.
 """
 
 import argparse
-import os
+from pathlib import Path
 import re
 import sys
 
@@ -22,7 +23,7 @@ parser.add_argument("SCRIPTS_DIR", help="scripts directory path")
 parser.add_argument("SCRIPTS_LST", help="scripts.lst path")
 
 
-def get_lvars_map(scripts_lst_path: str) -> LVarMap:
+def get_lvars_map(scripts_lst_path: str | Path) -> LVarMap:
     """Parse scripts.lst to extract local variable allocations.
 
     Args:
@@ -32,7 +33,7 @@ def get_lvars_map(scripts_lst_path: str) -> LVarMap:
         Dictionary mapping script names to their allocated local variable count
     """
     lvars: LVarMap = {}
-    with open(scripts_lst_path, encoding="cp1252") as fhandle:
+    with open(scripts_lst_path, encoding="utf-8") as fhandle:
         for line in fhandle:
             match = re.match(r"^(\w+)\.int.*local_vars=(\d+)", line)
             if match:
@@ -43,7 +44,7 @@ def get_lvars_map(scripts_lst_path: str) -> LVarMap:
     return lvars
 
 
-def get_max_lvar(fpath: str) -> int:
+def get_max_lvar(fpath: str | Path) -> int:
     """Find the maximum LVAR index used in a script file.
 
     Args:
@@ -54,7 +55,7 @@ def get_max_lvar(fpath: str) -> int:
     """
     max_lvar: int = 0
     found_lvar: bool = False
-    with open(fpath, encoding="cp1252") as fhandle:
+    with open(fpath, encoding="utf-8") as fhandle:
         for fline in fhandle:
             match = re.match(r"^#define\s+LVAR_\w+\s+\((\d+)\)\s+.*", fline)
             if match:
@@ -62,7 +63,7 @@ def get_max_lvar(fpath: str) -> int:
                 cur_lvar = int(match[1])
                 max_lvar = max(max_lvar, cur_lvar)
 
-    # LVAR index starts from 0
+    # LVAR index starts from 0, so variable count is max index + 1
     if found_lvar:
         max_lvar += 1
 
@@ -72,21 +73,23 @@ def get_max_lvar(fpath: str) -> int:
 def main(argv: list[str] | None = None) -> None:
     """Main entry point for LVAR validation."""
     args = parser.parse_args(argv)
-    lvars = get_lvars_map(args.SCRIPTS_LST)
+    scripts_dir = Path(args.SCRIPTS_DIR)
+    scripts_lst_path = Path(args.SCRIPTS_LST)
+
+    lvars = get_lvars_map(scripts_lst_path)
     found_mismatch = False
-    for dir_name, _, file_list in os.walk(args.SCRIPTS_DIR, topdown=False):
-        for file_name in file_list:
-            if file_name.endswith(".ssl"):
-                path = os.path.join(dir_name, file_name)
-                max_lvar = get_max_lvar(path)
-                script_name = os.path.splitext(file_name)[0]
-                if script_name in lvars and lvars[script_name] < max_lvar:
-                    print(
-                        f"Script {script_name} max LVAR index is {max_lvar - 1}, "
-                        f"which requires {max_lvar} variables, "
-                        f"but scripts.lst only allows {lvars[script_name]}."
-                    )
-                    found_mismatch = True
+
+    for ssl_path in scripts_dir.rglob("*.ssl"):
+        max_lvar = get_max_lvar(ssl_path)
+        script_name = ssl_path.stem
+        if script_name in lvars and lvars[script_name] < max_lvar:
+            print(
+                f"Script {script_name} max LVAR index is {max_lvar - 1}, "
+                f"which requires {max_lvar} variables, "
+                f"but scripts.lst only allows {lvars[script_name]}."
+            )
+            found_mismatch = True
+
     if found_mismatch:
         sys.exit(1)
 

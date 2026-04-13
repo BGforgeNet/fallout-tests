@@ -9,6 +9,7 @@ This module checks for:
 
 import argparse
 from collections import Counter
+from pathlib import Path
 import re
 import sys
 
@@ -25,7 +26,7 @@ parser.add_argument("SCRIPTS_H", help="scripts.h path")
 parser.add_argument("SCRIPTS_LST", help="scripts.lst path")
 
 
-def parse_h(scripts_h_path: str) -> tuple[ScriptsByNumber, ScriptsByName]:
+def parse_h(scripts_h_path: str | Path) -> tuple[ScriptsByNumber, ScriptsByName]:
     """Parse scripts.h file to extract script definitions.
 
     Args:
@@ -36,7 +37,7 @@ def parse_h(scripts_h_path: str) -> tuple[ScriptsByNumber, ScriptsByName]:
     """
     h_by_num: ScriptsByNumber = {}
     h_by_name: ScriptsByName = {}
-    with open(scripts_h_path, encoding="cp1252") as fhandle:
+    with open(scripts_h_path, encoding="utf-8") as fhandle:
         for line in fhandle:
             match = re.match(r"^#define\s+SCRIPT_(\w+)\s+\((\d+)\)\s+.*", line)
             if match:
@@ -45,7 +46,7 @@ def parse_h(scripts_h_path: str) -> tuple[ScriptsByNumber, ScriptsByName]:
     return h_by_num, h_by_name
 
 
-def parse_lst(scripts_lst_path: str) -> ScriptsByNumber:
+def parse_lst(scripts_lst_path: str | Path) -> ScriptsByNumber:
     """Parse scripts.lst file to extract script list.
 
     Args:
@@ -55,9 +56,9 @@ def parse_lst(scripts_lst_path: str) -> ScriptsByNumber:
         Dictionary mapping line numbers to script names
     """
     lst_by_num: ScriptsByNumber = {}
-    with open(scripts_lst_path, encoding="cp1252") as fhandle:
+    with open(scripts_lst_path, encoding="utf-8") as fhandle:
         for linenum, line in enumerate(fhandle, start=1):
-            scr = line.split(".", maxsplit=1)[0].upper()
+            scr = line.split(".", maxsplit=1)[0].strip().upper()
             lst_by_num[linenum] = scr
     return lst_by_num
 
@@ -98,7 +99,7 @@ def check_scripts_h(lst_by_num: ScriptsByNumber, h_by_num: ScriptsByNumber, h_by
         True if problems were found, False otherwise
     """
     warning = False
-    for i in range(1, len(lst_by_num)):
+    for i in range(1, len(lst_by_num) + 1):
         if i in h_by_num:
             if lst_by_num[i] != h_by_num[i]:
                 print(f"Mismatch: scripts.lst {lst_by_num[i]}, scripts.h {h_by_num[i]}")
@@ -112,8 +113,10 @@ def check_scripts_h(lst_by_num: ScriptsByNumber, h_by_num: ScriptsByNumber, h_by
 def main(argv: list[str] | None = None) -> None:
     """Main entry point for script validation."""
     args = parser.parse_args(argv)
-    h_by_num, h_by_name = parse_h(args.SCRIPTS_H)
-    lst_by_num = parse_lst(args.SCRIPTS_LST)
+    scripts_h_path = Path(args.SCRIPTS_H)
+    scripts_lst_path = Path(args.SCRIPTS_LST)
+    h_by_num, h_by_name = parse_h(scripts_h_path)
+    lst_by_num = parse_lst(scripts_lst_path)
     has_lst_dupes = check_lst_dupes(lst_by_num)
     has_scripts_h_problem = check_scripts_h(lst_by_num, h_by_num, h_by_name)
 
