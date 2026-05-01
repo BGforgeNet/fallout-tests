@@ -46,5 +46,5 @@ FALLOUT_TEST_REPO=./tmp/Fallout2_Unofficial_Patch uv run pytest -m integration
 | `check_scripts`        | `true`                          | check `scripts.h` and `scripts.lst` |
 | `check_lvars`          | `true`                          | check LVARs vs `scripts.lst`        |
 | `check_msgs`           | `true`                          | check @ `msg` references in scripts |
-| `worldmap_path`        | `false`                         | path to `worldmap.txt`              |
-| `worldmap_script_sets` | `false`                         | allowed script sets in an encounter |
+| `worldmap_path`        | `""`                            | path to `worldmap.txt`; leave empty to skip worldmap tests |
+| `worldmap_script_sets` | `""`                            | allowed script sets in an encounter |
