@@ -88,7 +88,7 @@ def test_main_invalid_resolves_script_metadata(tmp_path: Path, capsys: pytest.Ca
         worldmap.main([str(wmap), "--scripts-h", str(scripts_h), "--scripts-lst", str(scripts_lst)])
     assert exc_info.value.code == 1
     assert capsys.readouterr().out == (
-        'Encounter: E01 (line 2) script combination is not allowed:\n'
+        "Encounter: E01 (line 2) script combination is not allowed:\n"
         '  1 = SCRIPT_ALPHA = "Alpha script"\n'
         '  2 = SCRIPT_BETA = "Beta script"\n'
     )

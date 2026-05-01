@@ -91,7 +91,9 @@ def get_script_descriptions(scripts_lst_path: Path | None) -> ScriptDescriptions
 def get_section_lines(worldmap_path: Path) -> SectionLines:
     """Return the source line number for each INI section header."""
     section_lines: SectionLines = {}
-    for line_number, line in enumerate(worldmap_path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
+    for line_number, line in enumerate(
+        worldmap_path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1
+    ):
         stripped = line.strip()
         if stripped.startswith("[") and stripped.endswith("]"):
             section_lines[stripped[1:-1]] = line_number
