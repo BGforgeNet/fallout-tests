@@ -19,7 +19,6 @@ ScriptsByName = dict[str, int]  # Maps script name to script number
 
 parser = argparse.ArgumentParser(
     description="Find discrepancies in scripts.lst and scripts.h",
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 
 parser.add_argument("SCRIPTS_H", help="scripts.h path")
@@ -110,8 +109,12 @@ def check_scripts_h(lst_by_num: ScriptsByNumber, h_by_num: ScriptsByNumber, h_by
     return warning
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Main entry point for script validation."""
+def main(argv: list[str] | None = None) -> bool:
+    """Main entry point for script validation.
+
+    Returns:
+        True if duplicates or scripts.h mismatches were found. The caller owns the exit code.
+    """
     args = parser.parse_args(argv)
     scripts_h_path = Path(args.SCRIPTS_H)
     scripts_lst_path = Path(args.SCRIPTS_LST)
@@ -120,9 +123,8 @@ def main(argv: list[str] | None = None) -> None:
     has_lst_dupes = check_lst_dupes(lst_by_num)
     has_scripts_h_problem = check_scripts_h(lst_by_num, h_by_num, h_by_name)
 
-    if has_lst_dupes or has_scripts_h_problem:
-        sys.exit(1)
+    return has_lst_dupes or has_scripts_h_problem
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(1 if main() else 0)

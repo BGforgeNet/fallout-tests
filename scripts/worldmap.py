@@ -21,7 +21,6 @@ SectionLines = dict[str, int]
 
 parser = argparse.ArgumentParser(
     description="Find discrepancies in worldmap.txt",
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 
 parser.add_argument("worldmap", help="worldmap.txt path")
@@ -30,33 +29,36 @@ parser.add_argument("--scripts-lst", dest="scripts_lst", help="scripts.lst path"
 parser.add_argument(
     "-s",
     dest="script_sets",
-    help="allow sets of scripts to be present in an encounter together, like so: '-s 100,101  200,201,202'",
+    help="allow a set of scripts to appear in an encounter together; repeat per set: '-s 100,101 -s 200,201,202'",
     action="append",
-    nargs="+",
     required=False,
 )
 
 
-def get_allowed_script_sets(script_sets: list[list[str]] | None) -> AllowedScriptSets:
+def get_allowed_script_sets(script_sets: list[str] | None) -> AllowedScriptSets:
     """Parse command line script set arguments to extract allowed script sets.
 
     Args:
-        script_sets: Parsed value of the -s argument, or None if not provided
+        script_sets: One entry per -s occurrence, or None if the flag was not given
 
     Returns:
         List of script sets where each set is a list of script numbers
+
+    Raises:
+        ValueError: a -s value does not hold a comma-separated list of script numbers.
     """
     allowed_script_sets: AllowedScriptSets = []
-    if script_sets:
-        allow_sets = script_sets[0]
-        for allow_set in allow_sets:
-            content = allow_set.split("#", 1)[0].split(";", 1)[0].strip()
-            if not content:
-                continue
-            allow_list = [item.strip() for item in content.split(",") if item.strip()]
+    for allow_set in script_sets or []:
+        content = allow_set.split("#", 1)[0].split(";", 1)[0].strip()
+        if not content:
+            continue
+        allow_list = [item.strip() for item in content.split(",") if item.strip()]
+        try:
             # Convert to int for proper numeric sorting
             allow_list_int = sorted(int(x) for x in allow_list)
-            allowed_script_sets.append(allow_list_int)
+        except ValueError as exc:
+            raise ValueError(f"-s {content!r}: expected comma-separated script numbers") from exc
+        allowed_script_sets.append(allow_list_int)
     return allowed_script_sets
 
 
@@ -118,19 +120,27 @@ def format_script_combination(
     return "\n".join(lines)
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Main entry point for worldmap validation."""
+def main(argv: list[str] | None = None) -> bool:
+    """Main entry point for worldmap validation.
+
+    Returns:
+        True if the worldmap is unreadable or holds a disallowed combination. The caller owns the exit code.
+    """
     args = parser.parse_args(argv)
     error = False
-    allowed_sets = get_allowed_script_sets(args.script_sets)
+    try:
+        allowed_sets = get_allowed_script_sets(args.script_sets)
+    except ValueError as exc:
+        print(exc)
+        return True
 
     worldmap_path = Path(args.worldmap)
     if not worldmap_path.exists():
         print(f"{args.worldmap} does not exist.")
-        sys.exit(1)
+        return True
     if not worldmap_path.is_file():
         print(f"{args.worldmap} is not a file")
-        sys.exit(1)
+        return True
 
     script_names = get_script_names(Path(args.scripts_h) if args.scripts_h else None)
     script_descriptions = get_script_descriptions(Path(args.scripts_lst) if args.scripts_lst else None)
@@ -169,9 +179,8 @@ def main(argv: list[str] | None = None) -> None:
                     )
                 )
                 error = True
-    if error:
-        sys.exit(1)
+    return error
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(1 if main() else 0)

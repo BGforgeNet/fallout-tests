@@ -52,6 +52,4 @@ def test_main_failing(tmp_path: Path) -> None:
     # Allocate only 2 vars; script needs 3 — should fail
     lst_file.write_text("vcdoctor.int    local_vars=2\n", encoding="utf-8")
 
-    with pytest.raises(SystemExit) as exc_info:
-        lvars.main([str(tmp_path), str(lst_file)])
-    assert exc_info.value.code == 1
+    assert lvars.main([str(tmp_path), str(lst_file)]) is True

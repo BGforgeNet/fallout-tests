@@ -1,0 +1,38 @@
+name: "Integration"
+
+# The integration suite validates against a pinned checkout of real Fallout modding data. The pin means the
+# result can only change when this repository's code changes, so it runs on push/PR like every other gate
+# rather than on a timer. The checkout is cached on the pinned commit, so the clone is a one-time cost.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      - name: Cache the pinned data checkout
+        # conftest.py holds the pinned commit, so keying on its hash re-clones exactly when the pin moves.
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tmp/Fallout2_Unofficial_Patch
+          key: fallout-data-${{ hashFiles('tests/conftest.py') }}
+
+      - name: Test
+        run: uv run pytest -m integration tests/ -v --tb=short

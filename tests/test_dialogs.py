@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import dialogs
-import pytest
 
 
 def test_get_generic_messages(fixtures_dir: Path) -> None:
@@ -30,6 +29,24 @@ def test_get_script_messages_range() -> None:
     """get_script_messages expands floater_rand ranges into individual IDs."""
     result = dialogs.get_script_messages("   floater_rand(100, 103)")
     assert result == ["100", "101", "102", "103"]
+
+
+def test_get_script_messages_at_line_start() -> None:
+    """Regression: a call with nothing before it on the line is still matched."""
+    result = dialogs.get_script_messages("display_mstr(100);")
+    assert result == ["100"]
+
+
+def test_get_script_messages_multiple_calls_on_one_line() -> None:
+    """Regression: every call on a line is matched, not just the last one."""
+    result = dialogs.get_script_messages('   Reply( mstr(152) + " " + mstr(153) );')
+    assert sorted(result) == ["152", "153"]
+
+
+def test_get_script_messages_ignores_longer_identifier() -> None:
+    """A call name that is the tail of a longer identifier is not a message reference."""
+    assert dialogs.get_script_messages("   foo_mstr(100);") == []
+    assert dialogs.get_gen_messages("   xg_mstr(100);") == []
 
 
 def test_get_script_messages_empty_line() -> None:
@@ -73,9 +90,7 @@ def test_main_failing(tmp_path: Path) -> None:
     # dialog file exists but is missing the referenced ID
     (dialog_dir / "vcdoctor.msg").write_bytes(b"{100}{}{Hello.}\n")
 
-    with pytest.raises(SystemExit) as exc_info:
-        dialogs.main([str(dialog_dir), str(scripts_dir)])
-    assert exc_info.value.code == 1
+    assert dialogs.main([str(dialog_dir), str(scripts_dir)]) is True
 
 
 def test_main_missing_generic_msg(tmp_path: Path) -> None:

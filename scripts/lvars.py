@@ -3,7 +3,7 @@
 
 This module ensures that scripts don't use more local variables (LVARs)
 than allocated in scripts.lst, preventing runtime errors.
-Only scripts.lst uses cp1252 encoding; .ssl script files are UTF-8/ASCII.
+Both scripts.lst and .ssl script files are UTF-8/ASCII.
 """
 
 import argparse
@@ -16,7 +16,6 @@ LVarMap = dict[str, int]  # Maps script name to number of local variables
 
 parser = argparse.ArgumentParser(
     description="Check if there are enough LVARs allowed in scripts.lst",
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 
 parser.add_argument("SCRIPTS_DIR", help="scripts directory path")
@@ -70,8 +69,12 @@ def get_max_lvar(fpath: str | Path) -> int:
     return max_lvar
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Main entry point for LVAR validation."""
+def main(argv: list[str] | None = None) -> bool:
+    """Main entry point for LVAR validation.
+
+    Returns:
+        True if any script needs more local variables than scripts.lst allows. The caller owns the exit code.
+    """
     args = parser.parse_args(argv)
     scripts_dir = Path(args.SCRIPTS_DIR)
     scripts_lst_path = Path(args.SCRIPTS_LST)
@@ -90,9 +93,8 @@ def main(argv: list[str] | None = None) -> None:
             )
             found_mismatch = True
 
-    if found_mismatch:
-        sys.exit(1)
+    return found_mismatch
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(1 if main() else 0)

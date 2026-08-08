@@ -3,7 +3,10 @@
 
 This module cross-references message IDs used in scripts with their
 corresponding .msg files to ensure all referenced messages exist.
-Only .msg dialog files use cp1252 encoding; .ssl script files are UTF-8/ASCII.
+Only .msg dialog files use a legacy codepage; .ssl script files are UTF-8/ASCII. They are read as cp1252
+with errors="replace" because translated trees ship other codepages (cp1250 for Czech and Polish, cp1251
+for Russian); only the ASCII {NNN} message IDs are extracted, so a lossy decode of the surrounding text
+cannot change the result.
 """
 
 import argparse
@@ -15,18 +18,21 @@ import sys
 MessageList = list[str]  # List of message IDs
 MessageDict = dict[str, MessageList]  # Maps message type to list of message IDs
 
-# Regex patterns for message function calls in scripts
+# Regex patterns for message function calls in scripts.
+# The (?<!\w) lookbehind rejects a longer identifier ending in the call name (g_mstr vs mstr) without
+# consuming a character, so a call at the start of a line still matches.
 _MSG_REGEX0 = re.compile(
-    r"[^_]+(?:display_mstr|floater|dude_floater|Reply|GOption|GLowOption|NOption"
+    r"(?<!\w)(?:display_mstr|floater|dude_floater|Reply|GOption|GLowOption|NOption"
     r"|NLowOption|BOption|BLowOption|GMessage|NMessage|BMessage) *\( *([0-9]{3,5}) *[,\)]"
 )
-_MSG_REGEX1 = re.compile(r"[^_]+mstr *\( *([0-9]{3,5}) *\)")
-_MSG_REGEX2 = re.compile(r"[^_]+(?:floater_rand|Reply_Rand) *\( *([0-9]{3,5}) *, *([0-9]{3,5})")
-_MSG_REGEX_GEN = re.compile(r"[^_]+g_mstr *\( *([0-9]{3,5}) *\)")
+_MSG_REGEX1 = re.compile(r"(?<!\w)mstr *\( *([0-9]{3,5}) *\)")
+_MSG_REGEX2 = re.compile(r"(?<!\w)(?:floater_rand|Reply_Rand) *\( *([0-9]{3,5}) *, *([0-9]{3,5})")
+_MSG_REGEX_GEN = re.compile(r"(?<!\w)g_mstr *\( *([0-9]{3,5}) *\)")
+_MSG_ID = re.compile(r"\{([0-9]{3,5})\}")
+_BLOCK_COMMENT = re.compile(r"/\*.+?\*/", re.DOTALL)
 
 parser = argparse.ArgumentParser(
     description="Find inconsistencies between ssl and msg",
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 
 parser.add_argument("DIALOG_DIR", help="path to msg dialog directory")
@@ -44,9 +50,9 @@ def get_generic_messages(file_path: str | Path) -> MessageList | None:
     """
     g_dialog_messages: MessageList = []
     try:
-        with open(file_path, encoding="cp1252") as fdialog:
+        with open(file_path, encoding="cp1252", errors="replace") as fdialog:
             for line in fdialog:
-                g_dialog_messages.extend(re.findall(r"\{([0-9]{3,5})\}", line))
+                g_dialog_messages.extend(_MSG_ID.findall(line))
     except OSError:
         return None
     return g_dialog_messages
@@ -74,9 +80,9 @@ def get_script_messages(line: str) -> MessageList:
         List of message IDs referenced in the line
     """
     messages = []
-    messages.extend(re.findall(_MSG_REGEX0, line))
-    messages.extend(re.findall(_MSG_REGEX1, line))
-    match = re.search(_MSG_REGEX2, line)
+    messages.extend(_MSG_REGEX0.findall(line))
+    messages.extend(_MSG_REGEX1.findall(line))
+    match = _MSG_REGEX2.search(line)
     if match:
         messages.extend([str(i) for i in range(int(match.group(1)), int(match.group(2)) + 1)])
     return messages
@@ -91,7 +97,7 @@ def get_gen_messages(line: str) -> MessageList:
     Returns:
         List of generic message IDs referenced in the line
     """
-    messages = re.findall(_MSG_REGEX_GEN, line)
+    messages = _MSG_REGEX_GEN.findall(line)
     return messages
 
 
@@ -129,9 +135,9 @@ def get_dialog_messages(dialog_path: str | Path) -> MessageList | None:
     """
     dialog_messages: MessageList = []
     try:
-        with open(dialog_path, encoding="cp1252") as fdialog:
+        with open(dialog_path, encoding="cp1252", errors="replace") as fdialog:
             for line in fdialog:
-                dialog_messages.extend(re.findall(r"\{([0-9]{3,5})\}", line))
+                dialog_messages.extend(_MSG_ID.findall(line))
     except OSError:
         return None
     return dialog_messages
@@ -148,7 +154,7 @@ def get_messages_from_file(script_text: str) -> MessageDict:
     """
     script_messages: MessageList = []
     gen_messages: MessageList = []
-    lines = re.sub(r"/\*.+?\*/", "", script_text, flags=re.DOTALL).split("\n")
+    lines = _BLOCK_COMMENT.sub("", script_text).split("\n")
     for line in lines:
         if line.lstrip().startswith("//"):
             continue
@@ -159,8 +165,12 @@ def get_messages_from_file(script_text: str) -> MessageDict:
     return {"script": script_messages, "gen": gen_messages}
 
 
-def main(argv: list[str] | None = None) -> None:
-    """Main entry point for dialog validation."""
+def main(argv: list[str] | None = None) -> bool:
+    """Main entry point for dialog validation.
+
+    Returns:
+        True if any referenced message is missing. The caller owns the exit code.
+    """
     args = parser.parse_args(argv)
     dialog_dir = Path(args.DIALOG_DIR)
     scripts_dir = Path(args.SCRIPTS_DIR)
@@ -170,6 +180,7 @@ def main(argv: list[str] | None = None) -> None:
 
     # If generic.msg is missing, generic message validation is skipped
     g_dialog_messages: MessageList = get_generic_messages(g_dialog_path) or []
+    g_dialog_set = set(g_dialog_messages)
 
     script_paths = get_script_paths(scripts_dir)
     found_missing = False
@@ -194,13 +205,14 @@ def main(argv: list[str] | None = None) -> None:
         if dialog_messages is None:
             continue
 
-        script_only = [item for item in script_messages if item not in dialog_messages]
+        dialog_set = set(dialog_messages)
+        script_only = [item for item in script_messages if item not in dialog_set]
         if script_only:
             print(f"Messages in {script_path} missing from {cur_dialog_path}: {' '.join(script_only)}")
             found_missing = True
         message_count += len(script_messages)
 
-        g_script_only = [item for item in g_script_messages if item not in g_dialog_messages]
+        g_script_only = [item for item in g_script_messages if item not in g_dialog_set]
         if g_script_only:
             print(f"Generic messages in {script_path} missing from {g_dialog_path}: {' '.join(g_script_only)}")
             found_missing = True
@@ -209,9 +221,8 @@ def main(argv: list[str] | None = None) -> None:
 
     print(f"Messages checked: {message_count}")
 
-    if found_missing:
-        sys.exit(1)
+    return found_missing
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(1 if main() else 0)

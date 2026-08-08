@@ -14,20 +14,47 @@ def test_get_allowed_script_sets_none() -> None:
 
 def test_get_allowed_script_sets_single() -> None:
     """get_allowed_script_sets parses a single comma-separated set."""
-    result = worldmap.get_allowed_script_sets([["100,101"]])
+    result = worldmap.get_allowed_script_sets(["100,101"])
     assert result == [[100, 101]]
 
 
 def test_get_allowed_script_sets_sorted() -> None:
     """get_allowed_script_sets sorts script numbers within each set."""
-    result = worldmap.get_allowed_script_sets([["201,200"]])
+    result = worldmap.get_allowed_script_sets(["201,200"])
     assert result == [[200, 201]]
 
 
 def test_get_allowed_script_sets_inline_comments() -> None:
     """get_allowed_script_sets strips inline # and ; comments."""
-    result = worldmap.get_allowed_script_sets([["100,101 # merchant guard", "201,200 ; caravan pair"]])
+    result = worldmap.get_allowed_script_sets(["100,101 # merchant guard", "201,200 ; caravan pair"])
     assert result == [[100, 101], [200, 201]]
+
+
+def test_get_allowed_script_sets_rejects_non_numeric() -> None:
+    """A -s value that is not a list of script numbers is named in the error."""
+    with pytest.raises(ValueError, match="widget"):
+        worldmap.get_allowed_script_sets(["100,widget"])
+
+
+def test_main_reports_bad_script_set(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """main() reports an unparseable -s value and fails, rather than raising a bare ValueError."""
+    wmap = tmp_path / "worldmap.txt"
+    wmap.write_text("[Encounter: E01]\ntype_00=Pid:1, Script:100\n", encoding="utf-8")
+    assert worldmap.main([str(wmap), "-s", "100,widget"]) is True
+    assert "widget" in capsys.readouterr().out
+
+
+def test_repeated_flag_keeps_every_set() -> None:
+    """Regression: every -s occurrence contributes a set; none is silently dropped."""
+    args = worldmap.parser.parse_args(["wmap.txt", "-s", "100,101", "-s", "200,201"])
+    assert worldmap.get_allowed_script_sets(args.script_sets) == [[100, 101], [200, 201]]
+
+
+def test_flag_before_positional_parses() -> None:
+    """Regression: -s takes exactly one value, so it cannot swallow the worldmap path."""
+    args = worldmap.parser.parse_args(["-s", "100,101", "wmap.txt"])
+    assert args.worldmap == "wmap.txt"
+    assert worldmap.get_allowed_script_sets(args.script_sets) == [[100, 101]]
 
 
 def test_main_valid(fixtures_dir: Path) -> None:
@@ -43,9 +70,7 @@ def test_main_invalid(tmp_path: Path) -> None:
         "[Encounter: E01]\ntype_00=Pid:16777225, Script:100\ntype_01=Pid:16777226, Script:200\n",
         encoding="utf-8",
     )
-    with pytest.raises(SystemExit) as exc_info:
-        worldmap.main([str(wmap)])
-    assert exc_info.value.code == 1
+    assert worldmap.main([str(wmap)]) is True
 
 
 def test_main_invalid_allowed(tmp_path: Path) -> None:
@@ -60,9 +85,7 @@ def test_main_invalid_allowed(tmp_path: Path) -> None:
 
 def test_missing_file(tmp_path: Path) -> None:
     """main() exits with code 1 for a nonexistent worldmap file."""
-    with pytest.raises(SystemExit) as exc_info:
-        worldmap.main([str(tmp_path / "nonexistent.txt")])
-    assert exc_info.value.code == 1
+    assert worldmap.main([str(tmp_path / "nonexistent.txt")]) is True
 
 
 def test_main_invalid_resolves_script_metadata(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -84,9 +107,7 @@ def test_main_invalid_resolves_script_metadata(tmp_path: Path, capsys: pytest.Ca
         encoding="utf-8",
     )
 
-    with pytest.raises(SystemExit) as exc_info:
-        worldmap.main([str(wmap), "--scripts-h", str(scripts_h), "--scripts-lst", str(scripts_lst)])
-    assert exc_info.value.code == 1
+    assert worldmap.main([str(wmap), "--scripts-h", str(scripts_h), "--scripts-lst", str(scripts_lst)]) is True
     assert capsys.readouterr().out == (
         "Encounter: E01 (line 2) script combination is not allowed:\n"
         '  1 = SCRIPT_ALPHA = "Alpha script"\n'
@@ -97,12 +118,12 @@ def test_main_invalid_resolves_script_metadata(tmp_path: Path, capsys: pytest.Ca
 @pytest.mark.integration
 @pytest.mark.skip(
     reason=(
-        "TODO: re-enable once the external Fallout2_Unofficial_Patch worldmap data is pinned "
-        "or the expected script combinations are updated."
+        "Needs a curated allowed-sets fixture: the pinned worldmap holds 26 multi-script encounter "
+        "combinations, and deciding which are legitimate requires maintainer domain knowledge. "
+        "Un-skip once those sets are recorded and passed via -s."
     )
 )
 def test_integration_worldmap(integration_repo: Path) -> None:
     """Integration: worldmap validation passes against Fallout2 Unofficial Patch data."""
     wmap_path = integration_repo / "data" / "data" / "worldmap.txt"
-    if wmap_path.exists():
-        worldmap.main([str(wmap_path)])
+    assert worldmap.main([str(wmap_path)]) is False

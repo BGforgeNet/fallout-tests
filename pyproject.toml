@@ -4,7 +4,11 @@ version = "0.1.1"
 description = "Fallout tests"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
+dependencies = []
+
+[dependency-groups]
+# The validators import only the standard library; everything here is tooling, not a runtime requirement.
+dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "ruff>=0.12.5",
@@ -15,12 +19,12 @@ dependencies = [
 # scripts/ is not a package; add it as a search path so ty can resolve the validator modules
 extra-paths = ["scripts"]
 
-[tool.pyright]
-extraPaths = ["scripts"]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["integration: tests against real Fallout modding data (requires network)"]
+
+[tool.coverage.run]
+source = ["scripts"]
 
 [tool.ruff]
 line-length = 120

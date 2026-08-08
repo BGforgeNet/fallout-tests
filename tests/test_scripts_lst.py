@@ -75,6 +75,4 @@ def test_main_failing(tmp_path: Path) -> None:
     lst_file = tmp_path / "scripts.lst"
     lst_file.write_text("wrong.int\n", encoding="utf-8")
 
-    with pytest.raises(SystemExit) as exc_info:
-        scripts_lst.main([str(h_file), str(lst_file)])
-    assert exc_info.value.code == 1
+    assert scripts_lst.main([str(h_file), str(lst_file)]) is True

@@ -48,6 +48,10 @@ runs:
     - name: Test
       shell: bash
       run: python3 ${GITHUB_ACTION_PATH}/scripts/action.py
+      # Composite actions do not receive INPUT_* environment variables automatically - only docker and
+      # JavaScript actions do - so these mappings are required, not boilerplate. Without them action.py
+      # reads nothing and every check silently passes against its defaults. Passing values through env
+      # rather than as arguments also keeps workflow input out of the shell command line.
       env:
         INPUT_SCRIPTS_H: ${{ inputs.scripts_h }}
         INPUT_SCRIPTS_LST: ${{ inputs.scripts_lst }}

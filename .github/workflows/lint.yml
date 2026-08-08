@@ -3,16 +3,26 @@ name: "Lint"
 on:
   pull_request:
   push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
       - name: Ruff
         run: |
@@ -23,4 +33,25 @@ jobs:
         run: uv run ty check
 
       - name: Test
-        run: uv run pytest -m "not integration" tests/ -v --tb=short
+        run: uv run pytest -m "not integration" tests/ -v --tb=short --cov=scripts --cov-fail-under=94
+
+  action:
+    # Exercises action.yml itself - the INPUT_* bindings and the GITHUB_ACTION_PATH invocation - which the
+    # unit tests cannot reach because they call the validators directly.
+    name: action self-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Run the action against the checked-in fixtures
+        uses: ./
+        with:
+          scripts_h: tests/fixtures/scripts.h
+          scripts_lst: tests/fixtures/scripts.lst
+          scripts_dir: tests/fixtures
+          dialog_dir: tests/fixtures
+          worldmap_path: tests/fixtures/worldmap.txt
+          worldmap_script_sets: "200 201"
