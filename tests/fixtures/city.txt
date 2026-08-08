@@ -1,0 +1,24 @@
+;
+; Area datafile for the worldmap.
+; Fields of entrance_N: state, x, y, map, elevation, tile, rotation
+;
+
+[Area 00]               ; Arroyo
+area_name=Arroyo
+world_pos=200,400
+start_state=On
+size=Medium             ; Size of circle
+townmap_art_idx=141
+townmap_label_art_idx=-1
+entrance_0=On,300,200,Arroyo Bridge,-1,-1,0
+entrance_1=Off,330,220,Arroyo Village,-1,-1,3  ; Etc.
+
+[Area 01]               ; Den
+area_name=Den
+world_pos=470,475
+start_state=Off
+size=Small
+townmap_art_idx=-1
+townmap_label_art_idx=-1
+entrance_0=On, 345 , 230 , Den Business , -1 , -1 , 5
+; entrance_1=On,345,230,Den Residential,-1,-1,0

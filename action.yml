@@ -33,8 +33,12 @@ inputs:
     description: check msg references in scripts
     default: "true"
     required: false
+  city_path:
+    description: city.txt path; if set, run city tests. Empty or false skips them
+    default: ""
+    required: false
   worldmap_path:
-    description: worldmap.txt path; if set, run worldmap tests
+    description: worldmap.txt path; if set, run worldmap tests. Empty or false skips them
     default: ""
     required: false
   worldmap_script_sets:
@@ -60,5 +64,6 @@ runs:
         INPUT_CHECK_SCRIPTS: ${{ inputs.check_scripts }}
         INPUT_CHECK_LVARS: ${{ inputs.check_lvars }}
         INPUT_CHECK_MSGS: ${{ inputs.check_msgs }}
+        INPUT_CITY_PATH: ${{ inputs.city_path }}
         INPUT_WORLDMAP_PATH: ${{ inputs.worldmap_path }}
         INPUT_WORLDMAP_SCRIPT_SETS: ${{ inputs.worldmap_script_sets }}

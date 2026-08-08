@@ -4,6 +4,7 @@
 import os
 import sys
 
+import city
 import dialogs
 import lvars
 import scripts_lst
@@ -79,6 +80,10 @@ def main() -> None:
                 os.environ.get("INPUT_SCRIPTS_DIR", "scripts_src"),
             ]
         )
+
+    city_path = os.environ.get("INPUT_CITY_PATH", "")
+    if not is_disabled(city_path):
+        failed |= city.main([city_path])
 
     worldmap_path = os.environ.get("INPUT_WORLDMAP_PATH", "")
     if not is_disabled(worldmap_path):

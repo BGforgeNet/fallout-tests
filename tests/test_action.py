@@ -91,6 +91,47 @@ def test_is_disabled_treats_real_paths_as_enabled(value: str) -> None:
     assert action.is_disabled(value) is False
 
 
+def test_main_city_path(tmp_path: Path) -> None:
+    """main() invokes city.main() when INPUT_CITY_PATH is set."""
+    city_txt = tmp_path / "city.txt"
+    city_txt.write_text("[Area 00]\n", encoding="utf-8")
+    with (
+        patch("city.main", return_value=False) as mock_city,
+        patch.dict(
+            os.environ,
+            {
+                "INPUT_CHECK_SCRIPTS": "false",
+                "INPUT_CHECK_LVARS": "false",
+                "INPUT_CHECK_MSGS": "false",
+                "INPUT_CITY_PATH": str(city_txt),
+                "INPUT_WORLDMAP_PATH": "",
+            },
+            clear=True,
+        ),
+    ):
+        action.main()
+        mock_city.assert_called_once_with([str(city_txt)])
+
+
+def test_main_skips_city_when_unset() -> None:
+    """city.txt is optional, so an unset path skips the check rather than failing."""
+    with (
+        patch("city.main") as mock_city,
+        patch.dict(
+            os.environ,
+            {
+                "INPUT_CHECK_SCRIPTS": "false",
+                "INPUT_CHECK_LVARS": "false",
+                "INPUT_CHECK_MSGS": "false",
+                "INPUT_WORLDMAP_PATH": "",
+            },
+            clear=True,
+        ),
+    ):
+        action.main()
+        mock_city.assert_not_called()
+
+
 def test_main_skips_worldmap_when_disabled_by_literal_false() -> None:
     """Regression: worldmap_path: false skips the check instead of looking for a file named "false"."""
     with (
