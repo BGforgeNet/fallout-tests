@@ -37,6 +37,10 @@ inputs:
     description: city.txt path; if set, run city tests. Empty or false skips them
     default: ""
     required: false
+  maps_path:
+    description: maps.txt path; if set, run maps tests. Empty or false skips them
+    default: ""
+    required: false
   worldmap_path:
     description: worldmap.txt path; if set, run worldmap tests. Empty or false skips them
     default: ""
@@ -65,5 +69,6 @@ runs:
         INPUT_CHECK_LVARS: ${{ inputs.check_lvars }}
         INPUT_CHECK_MSGS: ${{ inputs.check_msgs }}
         INPUT_CITY_PATH: ${{ inputs.city_path }}
+        INPUT_MAPS_PATH: ${{ inputs.maps_path }}
         INPUT_WORLDMAP_PATH: ${{ inputs.worldmap_path }}
         INPUT_WORLDMAP_SCRIPT_SETS: ${{ inputs.worldmap_script_sets }}

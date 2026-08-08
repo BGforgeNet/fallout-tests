@@ -1,0 +1,23 @@
+;
+; Map datafile for the worldmap.
+; Sections are read as "Map NNN" and the scan stops at the first gap.
+;
+
+[Map 000]
+lookup_name=Arroyo Bridge
+map_name=ARBRIDGE
+music=arroyo
+ambient_sfx=gustwind:20, rattle:15, vulture:15
+saved=No
+dead_bodies_age=Yes
+can_rest_here=Yes,Yes,Yes
+random_start_point_0=elev:0, tile_num:19086
+
+[Map 001]
+lookup_name=Den Business        ; trailing comments occur in real data
+map_name=DENBUS1
+music=den
+pipboy_active=Yes
+can_rest_here=No,No,No
+random_start_point_0=elev:0, tile_num:17302
+random_start_point_1=elev:1, tile_num:21315

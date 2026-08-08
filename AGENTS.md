@@ -4,7 +4,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Project
 
-A reusable GitHub Action that validates Fallout 1/2 modding data files in CI/CD pipelines. The four Python validators are standalone CLI tools; they are orchestrated by `scripts/action.py` when the Action runs.
+A reusable GitHub Action that validates Fallout 1/2 modding data files in CI/CD pipelines. The six Python validators are standalone CLI tools; they are orchestrated by `scripts/action.py` when the Action runs.
 
 ## Commands
 
@@ -24,6 +24,7 @@ python3 scripts/scripts_lst.py <scripts.h> <scripts.lst>
 python3 scripts/lvars.py <scripts_dir> <scripts.lst>
 python3 scripts/dialogs.py <dialog_dir> <scripts_dir>
 python3 scripts/city.py <city.txt>
+python3 scripts/maps.py <maps.txt>
 python3 scripts/worldmap.py <worldmap.txt> [-s <set1> -s <set2> ...]
 ```
 
@@ -33,9 +34,9 @@ CI runs two workflows: `lint.yml` (ruff, ty, the non-integration suite with a co
 
 ## Architecture
 
-All source lives in `scripts/`. The five validator modules are independent and do not import from each other; `action.py` imports all five to orchestrate them.
+All source lives in `scripts/`. The six validator modules are independent and do not import from each other; `action.py` imports all six to orchestrate them.
 
-Data-file field layouts and value ranges come from the engine source at https://github.com/fallout2-ce/fallout2-ce (`src/worldmap.cc` for `city.txt` and `worldmap.txt`), not from guesswork; cite the function when adding a check.
+Data-file field layouts and value ranges come from the engine source at https://github.com/fallout2-ce/fallout2-ce (`src/worldmap.cc` covers `city.txt`, `maps.txt` and `worldmap.txt`), not from guesswork; cite the function when adding a check.
 
 | Module | Input files | What it checks |
 |--------|-------------|----------------|
@@ -43,6 +44,7 @@ Data-file field layouts and value ranges come from the engine source at https://
 | `lvars.py` | `.ssl` files, `scripts.lst` | Allocated local variable count in the list ≥ max LVAR index used in the compiled script source |
 | `dialogs.py` | `.msg` files, `.ssl` files | Every message ID referenced in script source exists in the corresponding `.msg` dialog file |
 | `city.py` | `city.txt` | Area definitions: required keys, value ranges, contiguous `Area NN` numbering, and the seven-field entrance layout |
+| `maps.py` | `maps.txt` | Map definitions: required keys, value ranges, contiguous `Map NNN` numbering, ambient sfx and start-point lists |
 | `worldmap.py` | `worldmap.txt` | Script number combinations in encounter tables belong to a declared allowed set |
 
 **Encoding:** `.msg` dialog files use a legacy codepage and are read as `cp1252` with `errors="replace"`. The English tree is cp1252, but translated trees ship others (cp1250 for Czech and Polish, cp1251 for Russian); only the ASCII `{NNN}` message IDs are extracted, so a lossy decode of the surrounding text cannot change the result. All other files (`scripts.h`, `scripts.lst`, `.ssl` scripts, `worldmap.txt`) are UTF-8/ASCII.

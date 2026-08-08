@@ -14,6 +14,7 @@ A GitHub Action that checks Fallout 1/2 modding data for inconsistencies: `scrip
     scripts_dir: scripts_src
     dialog_dir: data/text/english/dialog
     city_path: data/data/city.txt
+    maps_path: data/data/maps.txt
     worldmap_path: data/data/worldmap.txt
     worldmap_script_sets: |
       100 101
@@ -32,5 +33,6 @@ A GitHub Action that checks Fallout 1/2 modding data for inconsistencies: `scrip
 | `check_lvars` | `true` | check LVARs against `scripts.lst` |
 | `check_msgs` | `true` | check `.msg` references in scripts |
 | `city_path` | `""` | `city.txt` path; empty or `false` skips the check |
+| `maps_path` | `""` | `maps.txt` path; empty or `false` skips the check |
 | `worldmap_path` | `""` | `worldmap.txt` path; empty or `false` skips the check |
 | `worldmap_script_sets` | `""` | script sets allowed to share an encounter, one set per line; `#` and `;` start a comment |

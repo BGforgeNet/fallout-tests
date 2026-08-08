@@ -113,6 +113,47 @@ def test_main_city_path(tmp_path: Path) -> None:
         mock_city.assert_called_once_with([str(city_txt)])
 
 
+def test_main_maps_path(tmp_path: Path) -> None:
+    """main() invokes maps.main() when INPUT_MAPS_PATH is set."""
+    maps_txt = tmp_path / "maps.txt"
+    maps_txt.write_text("[Map 000]\n", encoding="utf-8")
+    with (
+        patch("maps.main", return_value=False) as mock_maps,
+        patch.dict(
+            os.environ,
+            {
+                "INPUT_CHECK_SCRIPTS": "false",
+                "INPUT_CHECK_LVARS": "false",
+                "INPUT_CHECK_MSGS": "false",
+                "INPUT_MAPS_PATH": str(maps_txt),
+                "INPUT_WORLDMAP_PATH": "",
+            },
+            clear=True,
+        ),
+    ):
+        action.main()
+        mock_maps.assert_called_once_with([str(maps_txt)])
+
+
+def test_main_skips_maps_when_unset() -> None:
+    """maps.txt is optional, so an unset path skips the check rather than failing."""
+    with (
+        patch("maps.main") as mock_maps,
+        patch.dict(
+            os.environ,
+            {
+                "INPUT_CHECK_SCRIPTS": "false",
+                "INPUT_CHECK_LVARS": "false",
+                "INPUT_CHECK_MSGS": "false",
+                "INPUT_WORLDMAP_PATH": "",
+            },
+            clear=True,
+        ),
+    ):
+        action.main()
+        mock_maps.assert_not_called()
+
+
 def test_main_skips_city_when_unset() -> None:
     """city.txt is optional, so an unset path skips the check rather than failing."""
     with (

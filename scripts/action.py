@@ -7,6 +7,7 @@ import sys
 import city
 import dialogs
 import lvars
+import maps
 import scripts_lst
 import worldmap
 
@@ -84,6 +85,10 @@ def main() -> None:
     city_path = os.environ.get("INPUT_CITY_PATH", "")
     if not is_disabled(city_path):
         failed |= city.main([city_path])
+
+    maps_path = os.environ.get("INPUT_MAPS_PATH", "")
+    if not is_disabled(maps_path):
+        failed |= maps.main([maps_path])
 
     worldmap_path = os.environ.get("INPUT_WORLDMAP_PATH", "")
     if not is_disabled(worldmap_path):
