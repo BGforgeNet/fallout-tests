@@ -197,8 +197,9 @@ def check_map(section: MapSection) -> list[tuple[int, str]]:
             start_points += _count_start_points(entry.value)
             problem = _check_start_point(entry.value)
         else:
-            # wmMapInit ignores keys it does not know, so a misspelling reads as a default in silence.
-            # A new sfall extension lands here too, and is a signal to add it to _KEY_CHECKS.
+            # wmMapInit ignores unknown keys, so a misspelling reads as a default in silence. Fatal by
+            # choice: the original game data carries one (state, in Map 013) and the fix is deleting the
+            # dead line, not whitelisting it; a new sfall extension lands here too and belongs above.
             check = _KEY_CHECKS.get(entry.key)
             problem = check(entry.value) if check else "unknown key, the engine ignores it"
         if problem:
@@ -250,6 +251,24 @@ def check_map_sequence(sections: list[MapSection]) -> list[tuple[int, str]]:
             expected = index
         expected += 1
     return problems
+
+
+def lookup_names(maps_path: str | Path) -> dict[str, int]:
+    """Index the map names city.txt entrances resolve against.
+
+    Args:
+        maps_path: Path to maps.txt
+
+    Returns:
+        Lowercased lookup_name to the line it is declared on; the engine matches case-insensitively
+    """
+    maps_path = Path(maps_path)
+    names: dict[str, int] = {}
+    for section in parse_maps(maps_path.read_text(encoding="utf-8", errors="replace")):
+        for entry in section.entries:
+            if entry.key == "lookup_name":
+                names.setdefault(entry.value.lower(), entry.line)
+    return names
 
 
 def check_lookup_names(sections: list[MapSection]) -> list[tuple[int, str]]:

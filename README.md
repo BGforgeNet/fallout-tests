@@ -32,7 +32,7 @@ A GitHub Action that checks Fallout 1/2 modding data for inconsistencies: `scrip
 | `check_scripts` | `true` | check `scripts.h` against `scripts.lst` |
 | `check_lvars` | `true` | check LVARs against `scripts.lst` |
 | `check_msgs` | `true` | check `.msg` references in scripts |
-| `city_path` | `""` | `city.txt` path; empty or `false` skips the check |
+| `city_path` | `""` | `city.txt` path; empty or `false` skips the check. With `maps_path` set too, entrance map names are checked against `maps.txt` |
 | `maps_path` | `""` | `maps.txt` path; empty or `false` skips the check |
 | `worldmap_path` | `""` | `worldmap.txt` path; empty or `false` skips the check |
 | `worldmap_script_sets` | `""` | script sets allowed to share an encounter, one set per line; `#` and `;` start a comment |

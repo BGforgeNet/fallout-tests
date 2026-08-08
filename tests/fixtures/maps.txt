@@ -14,6 +14,12 @@ can_rest_here=Yes,Yes,Yes
 random_start_point_0=elev:0, tile_num:19086
 
 [Map 001]
+lookup_name=Arroyo Village
+map_name=ARVILLAG
+music=arroyo
+saved=Yes
+
+[Map 002]
 lookup_name=Den Business        ; trailing comments occur in real data
 map_name=DENBUS1
 music=den

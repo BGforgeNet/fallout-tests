@@ -184,6 +184,42 @@ def test_main_failing(tmp_path: Path) -> None:
     assert city.main([str(city_txt)]) is True
 
 
+def test_entrance_map_name_is_resolved_against_maps(tmp_path: Path, fixtures_dir: Path) -> None:
+    """wmParseFindMapIdxMatch aborts the whole city load when a name matches no lookup_name."""
+    city_txt = tmp_path / "city.txt"
+    city_txt.write_text(_area(entrance_0="On,345,230,No Such Map,-1,-1,0"), encoding="utf-8")
+    problems = city.find_problems(city_txt, fixtures_dir / "maps.txt")
+    assert [p for p in problems if "'No Such Map' is not declared in maps.txt" in p]
+
+
+def test_known_entrance_map_name_is_accepted(tmp_path: Path, fixtures_dir: Path) -> None:
+    """The comparison is case-insensitive, matching compat_stricmp in the engine."""
+    city_txt = tmp_path / "city.txt"
+    city_txt.write_text(_area(entrance_0="On,345,230,ARROYO BRIDGE,-1,-1,0"), encoding="utf-8")
+    assert city.find_problems(city_txt, fixtures_dir / "maps.txt") == []
+
+
+def test_map_name_checked_even_when_field_count_is_wrong(tmp_path: Path, fixtures_dir: Path) -> None:
+    """A stray field lands after the map name, so the engine still reads position 3 as the map."""
+    city_txt = tmp_path / "city.txt"
+    city_txt.write_text(_area(entrance_0="On,345,230,No Such Map,0,-1,-1,0"), encoding="utf-8")
+    problems = city.find_problems(city_txt, fixtures_dir / "maps.txt")
+    assert [p for p in problems if "not declared in maps.txt" in p]
+    assert [p for p in problems if "got 8" in p]
+
+
+def test_cross_reference_is_skipped_without_maps(tmp_path: Path) -> None:
+    """maps.txt is optional; without it an unknown map name is not reported."""
+    city_txt = tmp_path / "city.txt"
+    city_txt.write_text(_area(entrance_0="On,345,230,No Such Map,-1,-1,0"), encoding="utf-8")
+    assert city.find_problems(city_txt) == []
+
+
+def test_main_reports_missing_maps_file(tmp_path: Path, fixtures_dir: Path) -> None:
+    """A --maps path that does not exist is reported rather than silently skipping the check."""
+    assert city.main([str(fixtures_dir / "city.txt"), "--maps", str(tmp_path / "nope.txt")]) is True
+
+
 def test_main_missing_file(tmp_path: Path) -> None:
     """A missing city.txt is reported rather than raising."""
     assert city.main([str(tmp_path / "nonexistent.txt")]) is True

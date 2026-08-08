@@ -82,12 +82,17 @@ def main() -> None:
             ]
         )
 
+    maps_path = os.environ.get("INPUT_MAPS_PATH", "")
+    maps_enabled = not is_disabled(maps_path)
+
     city_path = os.environ.get("INPUT_CITY_PATH", "")
     if not is_disabled(city_path):
-        failed |= city.main([city_path])
+        # With maps.txt too, entrance map names are resolved against its lookup_name entries; the
+        # engine aborts the whole city load when one does not match.
+        city_argv = [city_path] + (["--maps", maps_path] if maps_enabled else [])
+        failed |= city.main(city_argv)
 
-    maps_path = os.environ.get("INPUT_MAPS_PATH", "")
-    if not is_disabled(maps_path):
+    if maps_enabled:
         failed |= maps.main([maps_path])
 
     worldmap_path = os.environ.get("INPUT_WORLDMAP_PATH", "")

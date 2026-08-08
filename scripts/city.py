@@ -19,6 +19,8 @@ from pathlib import Path
 import re
 import sys
 
+import maps
+
 # Field layout of entrance_N, from EntranceInfo in fallout2-ce src/worldmap.cc.
 ENTRANCE_FIELDS = ("state", "x", "y", "map", "elevation", "tile", "rotation")
 WORLD_POS_FIELDS = ("x", "y")
@@ -43,6 +45,12 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument("CITY_TXT", help="city.txt path")
+parser.add_argument(
+    "--maps",
+    dest="maps_txt",
+    help="maps.txt path; when given, entrance map names are resolved against its lookup_name entries",
+    required=False,
+)
 
 
 @dataclass
@@ -256,11 +264,44 @@ def check_area_sequence(areas: list[Area]) -> list[tuple[int, str]]:
     return problems
 
 
-def find_problems(city_path: str | Path) -> list[str]:
+def check_entrance_maps(areas: list[Area], known_maps: dict[str, int]) -> list[tuple[int, str]]:
+    """Every entrance names a map that maps.txt must declare.
+
+    wmParseFindMapIdxMatch compares the name case-insensitively against each lookup_name and returns -1
+    when none matches, which aborts wmAreaInit - so an unknown name is a hard load failure, not a shift.
+
+    Args:
+        areas: Parsed areas in file order
+        known_maps: Lowercased lookup_name to declaring line, from maps.lookup_names()
+
+    Returns:
+        (line number, message) per entrance naming a map that maps.txt does not declare
+    """
+    problems: list[tuple[int, str]] = []
+    for area in areas:
+        for entry in area.entries:
+            if not _ENTRANCE_KEY_RE.match(entry.key):
+                continue
+            fields = [item.strip() for item in entry.value.split(",")]
+            map_index = ENTRANCE_FIELDS.index("map")
+            if len(fields) <= map_index:
+                # Too short to hold a map name at all; the field count is reported separately.
+                continue
+            # The engine reads this position whatever follows it, so a stray later field does not
+            # move the map name - check it even when the field count is already wrong.
+            map_name = fields[map_index]
+            if map_name and map_name.lower() not in known_maps:
+                message = f"[{area.name}] {entry.key}: map {map_name!r} is not declared in maps.txt"
+                problems.append((entry.line, message))
+    return problems
+
+
+def find_problems(city_path: str | Path, maps_path: str | Path | None = None) -> list[str]:
     """Check every area in city.txt.
 
     Args:
         city_path: Path to city.txt
+        maps_path: Optional maps.txt, enabling the entrance map name cross-reference
 
     Returns:
         One message per problem, naming the file, line number and area
@@ -271,6 +312,8 @@ def find_problems(city_path: str | Path) -> list[str]:
     located: list[tuple[int, str]] = list(check_area_sequence(areas))
     for area in areas:
         located.extend((line, f"[{area.name}] {message}") for line, message in check_area(area))
+    if maps_path is not None:
+        located.extend(check_entrance_maps(areas, maps.lookup_names(maps_path)))
 
     return [f"{city_path}:{line}: {message}" for line, message in sorted(located)]
 
@@ -290,7 +333,12 @@ def main(argv: list[str] | None = None) -> bool:
         print(f"{args.CITY_TXT} is not a file")
         return True
 
-    problems = find_problems(city_path)
+    maps_path = Path(args.maps_txt) if args.maps_txt else None
+    if maps_path is not None and not maps_path.is_file():
+        print(f"{args.maps_txt} does not exist.")
+        return True
+
+    problems = find_problems(city_path, maps_path)
     for problem in problems:
         print(problem)
     return bool(problems)
