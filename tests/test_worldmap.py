@@ -115,6 +115,77 @@ def test_main_invalid_resolves_script_metadata(tmp_path: Path, capsys: pytest.Ca
     )
 
 
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        pytest.param("Chance:5%,Enc:(2-4) Raiders AMBUSH Player,If(x)", ["Raiders", "Player"], id="ambush"),
+        pytest.param("Chance:5%,Enc:(1) A AND (2 - 3) B FIGHTING C", ["A", "B", "C"], id="counts-and-situations"),
+        pytest.param("Chance:5%,Enc: Lone", ["Lone"], id="no-count-no-comma"),
+        pytest.param("Chance:1%,Special,If(Player(Level) > 3)   ; Enc:Fake", [], id="special-comment"),
+        pytest.param("Chance:5%,ENC:(2-4) Raiders", ["Raiders"], id="key-any-case"),
+    ],
+)
+def test_get_table_encounter_names(value: str, expected: list[str]) -> None:
+    """Names alternate with situation words in the Enc: part, as the engine reads them."""
+    assert worldmap.get_table_encounter_names(value) == expected
+
+
+TABLE_WORLDMAP = """\
+[Encounter Table 0]
+lookup_name=DstN
+maps=Desert Encounter 1, Desert Encounter 2
+enc_00=Chance:5%,Enc:(2-4) raiders AMBUSH Player
+enc_01=Chance:5%,Enc:(1) Raidrs AND (1) Empty
+enc_02=Chance:5%,Enc:(1) A_Very_Long_Encounter_Name_Here AMBUSH Player
+
+[Encounter: Raiders]
+type_00=Pid:1, Script:1
+
+[Encounter: Empty]
+position=surrounding
+
+[Encounter: A_Very_Long_Encounter_Name_Here]
+type_00=Pid:1, Script:2
+"""
+
+
+def test_main_reports_table_names(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Undefined, type_00-less and overlong names are reported; names match regardless of case."""
+    wmap = tmp_path / "worldmap.txt"
+    wmap.write_text(TABLE_WORLDMAP, encoding="utf-8")
+    assert worldmap.main([str(wmap)]) is True
+    assert capsys.readouterr().out.splitlines() == [
+        "Encounter Table 0 (line 1) enc_01: encounter Raidrs has no [Encounter: Raidrs] section with type_00.",
+        "Encounter Table 0 (line 1) enc_01: encounter Empty has no [Encounter: Empty] section with type_00.",
+        "Encounter Table 0 (line 1) enc_02: encounter name A_Very_Long_Encounter_Name_Here is longer than "
+        "28 characters.",
+    ]
+
+
+def test_max_encounter_name_matches_engine_buffer() -> None:
+    """The engine's 40-byte section buffer, less "Encounter: " and the terminator, leaves 28 characters."""
+    expected_max = 28
+    assert expected_max == worldmap.MAX_ENCOUNTER_NAME
+
+
+def test_main_reports_script_out_of_range(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Script:N must be a scripts.lst line, 1 to the line count; checked only when scripts.lst is given."""
+    wmap = tmp_path / "worldmap.txt"
+    # Script: outside an encounter section is not a critter script, so it is not checked.
+    wmap.write_text(
+        "[Data]\nnote=Script:99\n[Encounter: E01]\ntype_00=Pid:1, Script:2\ntype_01=Pid:1, Script:3\n",
+        encoding="utf-8",
+    )
+    scripts_lst = tmp_path / "scripts.lst"
+    scripts_lst.write_text("a.int ; A\nb.int ; B\n", encoding="utf-8")
+    assert worldmap.main([str(wmap), "-s", "2,3"]) is False
+    assert worldmap.main([str(wmap), "--scripts-lst", str(scripts_lst), "-s", "2,3"]) is True
+    assert (
+        capsys.readouterr().out
+        == "Encounter: E01 (line 3) type_01: Script:3 is outside scripts.lst, which has 2 lines.\n"
+    )
+
+
 @pytest.mark.integration
 @pytest.mark.skip(
     reason=(

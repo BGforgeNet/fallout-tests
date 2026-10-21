@@ -267,6 +267,71 @@ def test_main_worldmap_path(tmp_path: Path) -> None:
         )
 
 
+OFF = {"INPUT_CHECK_SCRIPTS": "false", "INPUT_CHECK_LVARS": "false", "INPUT_CHECK_MSGS": "false"}
+
+
+def test_main_quests_wiring() -> None:
+    """quests.main() gets vault13.gam from beside quests.txt and the .msg files from game_msg_dir."""
+    env = {**OFF, "INPUT_QUESTS_PATH": "mod/data/quests.txt", "INPUT_GAME_MSG_DIR": "mod/text/game"}
+    with patch("quests.main", return_value=False) as mock_quests, patch.dict(os.environ, env, clear=True):
+        action.main()
+    mock_quests.assert_called_once_with(
+        [
+            "mod/data/quests.txt",
+            "--quests-msg",
+            str(Path("mod/text/game/quests.msg")),
+            "--map-msg",
+            str(Path("mod/text/game/map.msg")),
+            "--gam",
+            str(Path("mod/data/vault13.gam")),
+        ]
+    )
+
+
+def test_main_quests_default_game_dir() -> None:
+    """Without game_msg_dir, the .msg files come from the English game directory, as action.yml declares."""
+    env = {**OFF, "INPUT_QUESTS_PATH": "data/data/quests.txt"}
+    with patch("quests.main", return_value=False) as mock_quests, patch.dict(os.environ, env, clear=True):
+        action.main()
+    assert mock_quests.call_args.args[0][2] == str(Path("data/text/english/game/quests.msg"))
+
+
+def test_main_mvars_wiring() -> None:
+    """mvars.main() gets the map .gam directory and the scripts directory."""
+    env = {**OFF, "INPUT_MAP_GAM_DIR": "data/maps", "INPUT_SCRIPTS_DIR": "src"}
+    with patch("mvars.main", return_value=False) as mock_mvars, patch.dict(os.environ, env, clear=True):
+        action.main()
+    mock_mvars.assert_called_once_with(["data/maps", "src"])
+
+
+@pytest.mark.parametrize("value", ["", "false"])
+def test_main_quests_and_mvars_off(value: str) -> None:
+    """Empty or false path inputs skip the quests and map variable checks."""
+    env = {**OFF, "INPUT_QUESTS_PATH": value, "INPUT_MAP_GAM_DIR": value}
+    with (
+        patch("quests.main", return_value=False) as mock_quests,
+        patch("mvars.main", return_value=False) as mock_mvars,
+        patch.dict(os.environ, env, clear=True),
+    ):
+        action.main()
+    mock_quests.assert_not_called()
+    mock_mvars.assert_not_called()
+
+
+@pytest.mark.parametrize("failing", ["quests.main", "mvars.main"])
+def test_main_new_checks_fail_the_run(failing: str) -> None:
+    """A failing quests or map variable check fails the action."""
+    env = {**OFF, "INPUT_QUESTS_PATH": "q.txt", "INPUT_MAP_GAM_DIR": "maps"}
+    with (
+        patch("quests.main", return_value=failing == "quests.main"),
+        patch("mvars.main", return_value=failing == "mvars.main"),
+        patch.dict(os.environ, env, clear=True),
+        pytest.raises(SystemExit) as exc,
+    ):
+        action.main()
+    assert exc.value.code == 1
+
+
 def test_main_worldmap_with_sets(tmp_path: Path) -> None:
     """main() passes parsed script sets to worldmap.main() when INPUT_WORLDMAP_SCRIPT_SETS is set."""
     wmap = tmp_path / "worldmap.txt"

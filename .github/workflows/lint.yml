@@ -56,4 +56,7 @@ jobs:
           city_path: tests/fixtures/city.txt
           maps_path: tests/fixtures/maps.txt
           worldmap_path: tests/fixtures/worldmap.txt
-          worldmap_script_sets: "200 201"
+          worldmap_script_sets: "2 3"
+          quests_path: tests/fixtures/quests.txt
+          game_msg_dir: tests/fixtures
+          map_gam_dir: tests/fixtures/maps

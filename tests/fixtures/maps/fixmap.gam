@@ -1,0 +1,7 @@
+// Map variables for the fixture map
+
+MAP_GLOBAL_VARS:
+//GLOBAL                                NUMBER
+
+MVAR_Door_Open                          :=0;    //      (0)
+MVAR_Guard_Count                        :=0;    //      (1)

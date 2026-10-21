@@ -4,7 +4,7 @@ Guidance for AI agents working in this repository.
 
 ## Project
 
-A reusable GitHub Action that validates Fallout 1/2 modding data in CI. Six validators in `scripts/`, each a standalone CLI, orchestrated by `scripts/action.py` reading `INPUT_*` env vars from `action.yml`.
+A reusable GitHub Action that validates Fallout 1/2 modding data in CI. Validators in `scripts/`, each a standalone CLI, orchestrated by `scripts/action.py` reading `INPUT_*` env vars from `action.yml`.
 
 ## Commands
 
@@ -25,7 +25,9 @@ python3 scripts/lvars.py <scripts_dir> <scripts.lst>
 python3 scripts/dialogs.py <dialog_dir> <scripts_dir>
 python3 scripts/city.py <city.txt> [--maps <maps.txt>]
 python3 scripts/maps.py <maps.txt>
-python3 scripts/worldmap.py <worldmap.txt> [-s <set1> -s <set2> ...]
+python3 scripts/worldmap.py <worldmap.txt> [--scripts-lst <scripts.lst>] [-s <set1> -s <set2> ...]
+python3 scripts/quests.py <quests.txt> --quests-msg <quests.msg> --map-msg <map.msg> --gam <vault13.gam>
+python3 scripts/mvars.py <maps_dir> <scripts_dir>
 ```
 
 CI gates every push and PR: `lint.yml` (lint, typecheck, unit suite with a coverage floor, and a self-test invoking `action.yml` against `tests/fixtures/`) and `integration.yml` (integration suite against the cached pinned checkout). The README is consumer-facing; contributor docs belong here.
@@ -39,7 +41,10 @@ CI gates every push and PR: `lint.yml` (lint, typecheck, unit suite with a cover
 | `dialogs.py` | `.msg`, `.ssl` | Every message ID a script references exists in its `.msg` |
 | `city.py` | `city.txt`, optionally `maps.txt` | Required keys, value ranges, contiguous `Area NN`, seven-field entrances; with `--maps`, that each entrance names a declared map |
 | `maps.py` | `maps.txt` | Required keys, value ranges, contiguous `Map NNN`, ambient sfx and start-point lists |
-| `worldmap.py` | `worldmap.txt` | Encounter script combinations belong to a declared allowed set |
+| `worldmap.py` | `worldmap.txt`, optionally `scripts.lst` | Encounter script combinations belong to a declared allowed set; table entries name defined encounters; `Script:N` is a `scripts.lst` line |
+| `quests.py` | `quests.txt`, `quests.msg`, `map.msg`, `vault13.gam` | Each quest's location and description messages exist and its gvar is declared |
+| `mvars.py` | map `.gam`, map headers, `.ssl` | A used `MVAR_` define is below its map's `.gam` variable count |
+| `gam.py` | `.gam` | Shared reader: counts variables the way the engine does (not a validator) |
 
 Field layouts and value ranges come from the engine at <https://github.com/fallout2-ce/fallout2-ce> (`src/worldmap.cc` covers `city.txt`, `maps.txt` and `worldmap.txt`) - cite the function when adding a check. Validators may reuse each other where the data spans two files: `city.py` calls `maps.lookup_names()` rather than growing a second reader for that format.
 

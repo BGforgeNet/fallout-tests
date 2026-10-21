@@ -1,7 +1,7 @@
 ### Fallout tests
 
 A GitHub Action that checks Fallout 1/2 modding data for inconsistencies: `scripts.h`, `scripts.lst`,
-`*.ssl`, `*.msg` and `worldmap.txt`.
+`*.ssl`, `*.msg`, `city.txt`, `maps.txt`, `worldmap.txt`, `quests.txt` and map `.gam` files.
 
 #### Usage
 
@@ -19,6 +19,8 @@ A GitHub Action that checks Fallout 1/2 modding data for inconsistencies: `scrip
     worldmap_script_sets: |
       100 101
       200 201 202
+    quests_path: data/data/quests.txt
+    map_gam_dir: data/maps
 ```
 
 #### Inputs
@@ -34,5 +36,8 @@ A GitHub Action that checks Fallout 1/2 modding data for inconsistencies: `scrip
 | `check_msgs` | `true` | check `.msg` references in scripts |
 | `city_path` | `""` | `city.txt` path; empty or `false` skips the check. With `maps_path` set too, entrance map names are checked against `maps.txt` |
 | `maps_path` | `""` | `maps.txt` path; empty or `false` skips the check |
-| `worldmap_path` | `""` | `worldmap.txt` path; empty or `false` skips the check |
+| `worldmap_path` | `""` | `worldmap.txt` path; empty or `false` skips the check. Also checks that encounter tables name defined encounters and that `Script:N` is within `scripts_lst` |
 | `worldmap_script_sets` | `""` | script sets allowed to share an encounter, one set per line; `#` and `;` start a comment |
+| `quests_path` | `""` | `quests.txt` path; empty or `false` skips the check. Reads `vault13.gam` beside it, and `quests.msg` and `map.msg` from `game_msg_dir` |
+| `game_msg_dir` | `data/text/english/game` | game `.msg` directory |
+| `map_gam_dir` | `""` | directory of map `.gam` files; empty or `false` skips the check. Map headers are read from `scripts_dir/headers` |

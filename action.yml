@@ -49,6 +49,18 @@ inputs:
     description: "allowed script sets, one space-separated set per line"
     default: ""
     required: false
+  quests_path:
+    description: quests.txt path; if set, run quests tests. Empty or false skips them
+    default: ""
+    required: false
+  game_msg_dir:
+    description: text/english/game path, holding quests.msg and map.msg
+    default: data/text/english/game
+    required: false
+  map_gam_dir:
+    description: maps directory holding map .gam files; if set, run map variable tests. Empty or false skips them
+    default: ""
+    required: false
 
 runs:
   using: "composite"
@@ -72,3 +84,6 @@ runs:
         INPUT_MAPS_PATH: ${{ inputs.maps_path }}
         INPUT_WORLDMAP_PATH: ${{ inputs.worldmap_path }}
         INPUT_WORLDMAP_SCRIPT_SETS: ${{ inputs.worldmap_script_sets }}
+        INPUT_QUESTS_PATH: ${{ inputs.quests_path }}
+        INPUT_GAME_MSG_DIR: ${{ inputs.game_msg_dir }}
+        INPUT_MAP_GAM_DIR: ${{ inputs.map_gam_dir }}

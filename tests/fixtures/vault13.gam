@@ -1,0 +1,8 @@
+// Global variables for the fixture game
+
+GAME_GLOBAL_VARS:
+//GLOBAL                                NUMBER
+
+GVAR_PLAYER_REPUTATION                  :=0;    //      (0)
+GVAR_QUEST_ONE                          :=0;    //      (1)
+GVAR_QUEST_TWO                          :=0;    //      (2)

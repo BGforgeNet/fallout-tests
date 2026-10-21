@@ -2,12 +2,15 @@
 """Entry point for the GitHub Action; dispatches to validator scripts based on INPUT_* env vars."""
 
 import os
+from pathlib import Path
 import sys
 
 import city
 import dialogs
 import lvars
 import maps
+import mvars
+import quests
 import scripts_lst
 import worldmap
 
@@ -46,6 +49,34 @@ def parse_script_sets(raw: str) -> list[str]:
                 raise ValueError(f"worldmap_script_sets: {number!r} in {content!r} is not a script number")
         parsed_sets.append(",".join(numbers))
     return parsed_sets
+
+
+def run_quests() -> bool:
+    """Run the quests.txt check when INPUT_QUESTS_PATH is set; return whether it failed."""
+    quests_path = os.environ.get("INPUT_QUESTS_PATH", "")
+    if is_disabled(quests_path):
+        return False
+    # The engine loads quests.txt and vault13.gam from the same data directory.
+    game_msg_dir = Path(os.environ.get("INPUT_GAME_MSG_DIR", "data/text/english/game"))
+    return quests.main(
+        [
+            quests_path,
+            "--quests-msg",
+            str(game_msg_dir / "quests.msg"),
+            "--map-msg",
+            str(game_msg_dir / "map.msg"),
+            "--gam",
+            str(Path(quests_path).parent / "vault13.gam"),
+        ]
+    )
+
+
+def run_mvars() -> bool:
+    """Run the map variable check when INPUT_MAP_GAM_DIR is set; return whether it failed."""
+    map_gam_dir = os.environ.get("INPUT_MAP_GAM_DIR", "")
+    if is_disabled(map_gam_dir):
+        return False
+    return mvars.main([map_gam_dir, os.environ.get("INPUT_SCRIPTS_DIR", "scripts_src")])
 
 
 def main() -> None:
@@ -115,6 +146,9 @@ def main() -> None:
             for script_set in script_sets:
                 worldmap_argv += ["-s", script_set]
             failed |= worldmap.main(worldmap_argv)
+
+    failed |= run_quests()
+    failed |= run_mvars()
 
     if failed:
         sys.exit(1)

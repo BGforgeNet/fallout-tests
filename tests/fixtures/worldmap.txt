@@ -1,7 +1,11 @@
+[Encounter Table 0]
+enc_00=Chance:10%,Enc:(1-2) E01 AMBUSH Player,If(Player(Level) > 2)
+enc_01=Chance:5%,Enc:(1) E01 AND (2-3) e02
+
 [Encounter: E01]
-type_00=Pid:16777225, Script:100
-type_01=Pid:16777226, Script:100
+type_00=Pid:16777225, Script:1
+type_01=Pid:16777226, Script:1
 
 [Encounter: E02]
-type_00=Pid:16777225, Script:200
-type_01=Dead, Pid:16777226, Script:201
+type_00=Pid:16777225, Script:2
+type_01=Dead, Pid:16777226, Script:3
