@@ -26,7 +26,7 @@ inputs:
     default: "true"
     required: false
   check_lvars:
-    description: check LVARs vs scripts.lst
+    description: check LVARs vs scripts.lst, and reaction LVAR indices 0-3
     default: "true"
     required: false
   check_msgs:

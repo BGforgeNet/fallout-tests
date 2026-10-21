@@ -30,7 +30,7 @@ A GitHub Action that checks Fallout 1/2 modding data for inconsistencies: `scrip
 | `scripts_dir` | `scripts_src` | scripts directory |
 | `dialog_dir` | `data/text/english/dialog` | dialog `.msg` directory |
 | `check_scripts` | `true` | check `scripts.h` against `scripts.lst` |
-| `check_lvars` | `true` | check LVARs against `scripts.lst` |
+| `check_lvars` | `true` | check LVARs against `scripts.lst`, and that scripts using the `modreact.h` reaction LVARs keep indices 0-3 free |
 | `check_msgs` | `true` | check `.msg` references in scripts |
 | `city_path` | `""` | `city.txt` path; empty or `false` skips the check. With `maps_path` set too, entrance map names are checked against `maps.txt` |
 | `maps_path` | `""` | `maps.txt` path; empty or `false` skips the check |

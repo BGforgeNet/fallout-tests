@@ -35,7 +35,7 @@ CI gates every push and PR: `lint.yml` (lint, typecheck, unit suite with a cover
 | Module | Input | What it checks |
 |--------|-------|----------------|
 | `scripts_lst.py` | `scripts.h`, `scripts.lst` | Names match between header and script list; no duplicates |
-| `lvars.py` | `.ssl`, `scripts.lst` | Allocated local variable count covers the highest LVAR index used |
+| `lvars.py` | `.ssl`, `.h`, `scripts.lst` | Allocated local variable count covers the highest LVAR index used; a script using the `modreact.h` reaction LVARs defines none of its own on their indices 0-3 |
 | `dialogs.py` | `.msg`, `.ssl` | Every message ID a script references exists in its `.msg` |
 | `city.py` | `city.txt`, optionally `maps.txt` | Required keys, value ranges, contiguous `Area NN`, seven-field entrances; with `--maps`, that each entrance names a declared map |
 | `maps.py` | `maps.txt` | Required keys, value ranges, contiguous `Map NNN`, ambient sfx and start-point lists |
